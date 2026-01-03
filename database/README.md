@@ -21,19 +21,25 @@ This directory contains the database schema and setup scripts for the MOCARDS de
 
 ### 3. Run Database Setup (One Command)
 
+#### **Option A: Fresh Database (Recommended)**
 1. Open your Supabase project dashboard
 2. Go to the **SQL Editor**
-3. Copy and paste the **entire contents** of `schema.sql`
+3. Copy and paste the **entire contents** of `schema-safe.sql`
 4. Click **Run** to execute everything at once
 
-The unified schema includes:
-- ✅ **Tables and indexes creation**
-- ✅ **Row Level Security policies**
-- ✅ **Functions and triggers**
-- ✅ **Sample data generation**
-- ✅ **Verification queries**
+#### **Option B: If You Get "Already Exists" Errors**
+If you've partially run setup before:
+1. Use `schema-safe.sql` instead of `schema.sql`
+2. This version handles existing tables/policies gracefully
 
-**That's it!** Everything will be set up in one go.
+**The unified schema includes:**
+- ✅ **Safe table creation** (IF NOT EXISTS)
+- ✅ **Safe policy management** (DROP IF EXISTS + CREATE)
+- ✅ **Safe trigger creation**
+- ✅ **Smart data insertion** (ON CONFLICT DO NOTHING)
+- ✅ **Built-in verification**
+
+**One file, zero errors!** 🎯
 
 ### 4. Create Admin User
 
@@ -71,13 +77,14 @@ The unified schema includes:
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| **`schema.sql`** | **Complete unified setup** | **Use this - everything in one file!** |
+| **`schema-safe.sql`** | **🛡️ Error-free setup** | **Use this - handles existing objects!** |
+| `schema.sql` | Complete unified setup | Fresh database only |
 | `supabase-setup.sql` | Tables and indexes only | Alternative: step-by-step approach |
 | `supabase-rls-policies.sql` | Security policies | Alternative: step-by-step approach |
 | `supabase-functions.sql` | Functions and triggers | Alternative: step-by-step approach |
 | `supabase-sample-data.sql` | Test data generation | Alternative: step-by-step approach |
 
-**📝 Note:** The individual `supabase-*.sql` files are kept for reference and debugging, but `schema.sql` is now the recommended all-in-one solution.
+**🎯 Recommended:** Use `schema-safe.sql` - it's bulletproof and handles any scenario!
 
 ### Verification Commands
 
