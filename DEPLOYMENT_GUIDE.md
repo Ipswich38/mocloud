@@ -27,9 +27,11 @@ Complete guide to deploy the MOC Card Generation System on Supabase and Vercel.
 3. Create a new query
 4. Copy and paste the entire content from:
    ```
-   database/supabase-cloud-deployment.sql
+   database/supabase-production-ready.sql
    ```
 5. Click **Run** to execute the schema
+
+**⚠️ Use the PRODUCTION-READY version** - This schema has been bulletproofed to handle all dependency issues and edge cases.
 
 This will create:
 - ✅ All required tables with proper relationships
