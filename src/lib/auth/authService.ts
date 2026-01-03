@@ -3,9 +3,62 @@ import { createClient } from '@/lib/supabase';
 export class AuthService {
   private supabase = createClient();
 
+  // Auto-setup admin user if it doesn't exist
+  private async autoSetupAdmin() {
+    try {
+      // Check if admin profile already exists
+      const { data: existingProfile } = await this.supabase
+        .from('user_profiles')
+        .select('id, username')
+        .eq('username', 'admin')
+        .single();
+
+      if (existingProfile) {
+        return; // Admin already exists
+      }
+
+      // Create admin user in auth.users with a generated email
+      const adminEmail = `admin-${Date.now()}@local.mocards`;
+      const { data: authData, error: authError } = await this.supabase.auth.signUp({
+        email: adminEmail,
+        password: 'admin123',
+        options: {
+          data: {
+            username: 'admin',
+            display_name: 'Administrator'
+          }
+        }
+      });
+
+      if (authError || !authData.user) {
+        console.warn('Could not auto-create auth user:', authError?.message);
+        return;
+      }
+
+      // Create user profile
+      await this.supabase
+        .from('user_profiles')
+        .insert({
+          id: authData.user.id,
+          username: 'admin',
+          display_name: 'Administrator',
+          email: adminEmail,
+          role: 'admin'
+        });
+
+    } catch (error) {
+      console.warn('Auto-setup admin failed:', error);
+    }
+  }
+
   // Sign in with username or email
   async signIn(usernameOrEmail: string, password: string) {
     try {
+      // Auto-setup admin if needed (for first-time setup)
+      if (usernameOrEmail === 'admin') {
+        await this.autoSetupAdmin();
+      }
+
       // Check if input looks like email
       const isEmail = usernameOrEmail.includes('@');
 
@@ -39,41 +92,6 @@ export class AuthService {
     }
   }
 
-  // Sign up with username and email
-  async signUp(username: string, email: string, password: string) {
-    try {
-      // Check if username already exists
-      const { data: existingProfile } = await this.supabase
-        .from('user_profiles')
-        .select('username')
-        .eq('username', username)
-        .single();
-
-      if (existingProfile) {
-        return { error: 'Username already taken' };
-      }
-
-      const { error } = await this.supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username,
-            display_name: username
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-
-      if (error) {
-        return { error: error.message };
-      }
-
-      return { error: null };
-    } catch (error) {
-      return { error: 'An unexpected error occurred' };
-    }
-  }
 
   // Get current session
   async getSession() {

@@ -411,77 +411,26 @@ SELECT 'Clinic codes:' as info, COUNT(*) as total,
 FROM clinic_codes;
 
 -- =====================================================
--- CREATE DEFAULT ADMIN USER
+-- ADMIN USER AUTO-SETUP
 -- =====================================================
--- Note: This creates the admin user in auth.users and user_profiles
+-- Note: Admin user will be automatically created on first login
 -- Default credentials: username = admin, password = admin123
--- Change password after first login!
+-- The application will auto-setup the admin user when someone tries to login with 'admin'
 
-DO $$
-DECLARE
-    admin_id UUID;
-    admin_exists BOOLEAN;
-BEGIN
-    -- Check if admin user already exists
-    SELECT EXISTS(
-        SELECT 1 FROM user_profiles
-        WHERE username = 'admin' AND role = 'admin'
-    ) INTO admin_exists;
+-- Create a placeholder admin profile if it doesn't exist
+-- This ensures the database is ready for auto-setup
+INSERT INTO user_profiles (id, username, display_name, email, role)
+VALUES (
+    '00000000-0000-0000-0000-000000000001'::UUID,
+    'admin_placeholder',
+    'Admin (Placeholder)',
+    'placeholder@local.system',
+    'public'
+) ON CONFLICT (username) DO NOTHING;
 
-    IF NOT admin_exists THEN
-        -- Generate a UUID for the admin user
-        admin_id := gen_random_uuid();
+-- Clean up any existing admin@mocards.com references
+DELETE FROM user_profiles WHERE email = 'admin@mocards.com';
 
-        -- Insert into auth.users (simplified for demo)
-        -- In production, use Supabase dashboard to create this user
-        INSERT INTO auth.users (
-            id,
-            aud,
-            role,
-            email,
-            encrypted_password,
-            email_confirmed_at,
-            raw_app_meta_data,
-            raw_user_meta_data,
-            created_at,
-            updated_at,
-            confirmation_token,
-            recovery_token
-        ) VALUES (
-            admin_id,
-            'authenticated',
-            'authenticated',
-            'admin@mocards.com',
-            crypt('admin123', gen_salt('bf')), -- Password: admin123
-            NOW(),
-            '{"provider":"email","providers":["email"]}',
-            '{"username":"admin"}',
-            NOW(),
-            NOW(),
-            '',
-            ''
-        ) ON CONFLICT (email) DO NOTHING;
-
-        -- Insert into user_profiles
-        INSERT INTO user_profiles (id, username, display_name, email, role)
-        VALUES (admin_id, 'admin', 'Administrator', 'admin@mocards.com', 'admin')
-        ON CONFLICT (username) DO NOTHING;
-
-        RAISE NOTICE 'Admin user created with username: admin, password: admin123';
-    ELSE
-        RAISE NOTICE 'Admin user already exists';
-    END IF;
-EXCEPTION
-    WHEN others THEN
-        -- If auth.users insert fails (which it will in managed Supabase),
-        -- just create the profile entry for manual user creation
-        INSERT INTO user_profiles (id, username, display_name, email, role)
-        SELECT id, 'admin', 'Administrator', 'admin@mocards.com', 'admin'
-        FROM auth.users
-        WHERE email = 'admin@mocards.com'
-        ON CONFLICT (username) DO UPDATE SET
-            role = 'admin',
-            display_name = 'Administrator';
-
-        RAISE NOTICE 'Please create admin user manually in Supabase dashboard with email: admin@mocards.com';
-END $$;
+RAISE NOTICE '✅ Database ready for auto-setup admin system';
+RAISE NOTICE '🔑 Login with username: admin, password: admin123';
+RAISE NOTICE '🚀 Admin user will be automatically created on first login';

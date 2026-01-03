@@ -12,7 +12,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (usernameOrEmail: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (username: string, email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -61,10 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return authService.signIn(usernameOrEmail, password);
   };
 
-  // Sign up function
-  const signUp = async (username: string, email: string, password: string) => {
-    return authService.signUp(username, email, password);
-  };
 
   // Sign out function
   const signOut = async () => {
@@ -130,7 +125,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signIn,
-    signUp,
     signOut,
     refreshProfile
   };

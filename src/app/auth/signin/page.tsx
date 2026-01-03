@@ -44,7 +44,7 @@ export default function SignInPage() {
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-blue-600 mb-2">MOCARDS</h1>
-          <p className="text-gray-500">Welcome back</p>
+          <p className="text-gray-500">Admin Access</p>
         </div>
 
         <Card className="shadow-lg border-0">
@@ -87,16 +87,11 @@ export default function SignInPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <Link href="/auth/signup" className="text-sm text-blue-600 hover:text-blue-700">
-                Create account
-              </Link>
-            </div>
           </CardContent>
         </Card>
 
         <div className="mt-4 text-center text-xs text-gray-400">
-          Demo: username: admin, password: admin123
+          Default: admin / admin123
         </div>
       </div>
     </div>

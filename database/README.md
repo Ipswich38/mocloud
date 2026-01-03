@@ -41,29 +41,22 @@ If you've partially run setup before:
 
 **One file, zero errors!** 🎯
 
-### 4. Create Admin User
+### 4. Admin Access (Auto-Setup)
 
-**Option A: Quick Setup (Recommended)**
-1. Go to Supabase Dashboard → Authentication → Users
-2. Click "Add User" and create:
-   - Email: `admin@mocards.com`
+**🚀 No Manual Setup Required!**
+
+The MOCARDS system now features **automatic admin creation**:
+
+1. **Just Login**: Go to `/auth/signin` and use:
+   - Username: `admin`
    - Password: `admin123`
-   - Confirm email immediately
-3. Run the `admin-setup.sql` script to create the profile
 
-**Option B: Manual Profile Creation**
-1. Sign up through your application with any email
-2. Get your user ID from the Supabase auth dashboard
-3. Run this SQL to make yourself an admin:
-   ```sql
-   UPDATE user_profiles
-   SET role = 'admin', username = 'admin'
-   WHERE id = 'your-user-id-here';
-   ```
+2. **Auto-Creation**: The system will automatically:
+   - Create the admin user on first login attempt
+   - Set up all necessary permissions
+   - Grant immediate admin dashboard access
 
-**Login Credentials:**
-- Username: `admin`
-- Password: `admin123`
+**That's it!** No database manipulation needed.
 
 ## 🔧 Troubleshooting
 

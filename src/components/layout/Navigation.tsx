@@ -88,18 +88,11 @@ export function Navigation() {
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <Link href="/auth/signin">
-                    <Button variant="outline" size="sm">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth/signup">
-                    <Button size="sm">
-                      Sign Up
-                    </Button>
-                  </Link>
-                </div>
+                <Link href="/auth/signin">
+                  <Button variant="outline" size="sm">
+                    Admin Login
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
@@ -162,18 +155,11 @@ export function Navigation() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <Link href="/auth/signin" className="block">
-                    <Button variant="outline" className="w-full">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth/signup" className="block">
-                    <Button className="w-full">
-                      Sign Up
-                    </Button>
-                  </Link>
-                </div>
+                <Link href="/auth/signin" className="block">
+                  <Button variant="outline" className="w-full">
+                    Admin Login
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
