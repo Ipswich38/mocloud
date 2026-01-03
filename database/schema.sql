@@ -8,7 +8,7 @@
 -- =====================================================
 -- 1. REGIONS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTSIF NOT EXISTS regions (
+CREATE TABLE IF NOT EXISTS regions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     code VARCHAR(3) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
@@ -26,7 +26,7 @@ ON CONFLICT (code) DO NOTHING;
 -- =====================================================
 -- 2. CLINIC CODES TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTSclinic_codes (
+CREATE TABLE IF NOT EXISTS clinic_codes (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     region_id UUID NOT NULL REFERENCES regions(id) ON DELETE CASCADE,
     code VARCHAR(6) NOT NULL UNIQUE, -- Format: CVT001, BTG002, etc.
@@ -35,13 +35,13 @@ CREATE TABLE IF NOT EXISTSclinic_codes (
 );
 
 -- Create index for faster lookups
-CREATE INDEX IF NOT EXISTSidx_clinic_codes_region_id ON clinic_codes(region_id);
-CREATE INDEX IF NOT EXISTSidx_clinic_codes_assigned ON clinic_codes(is_assigned);
+CREATE INDEX IF NOT EXISTS idx_clinic_codes_region_id ON clinic_codes(region_id);
+CREATE INDEX IF NOT EXISTS idx_clinic_codes_assigned ON clinic_codes(is_assigned);
 
 -- =====================================================
 -- 3. CLINICS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTSclinics (
+CREATE TABLE IF NOT EXISTS clinics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     clinic_code_id UUID NOT NULL REFERENCES clinic_codes(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -55,13 +55,13 @@ CREATE TABLE IF NOT EXISTSclinics (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTSidx_clinics_active ON clinics(is_active);
-CREATE INDEX IF NOT EXISTSidx_clinics_name ON clinics(name);
+CREATE INDEX IF NOT EXISTS idx_clinics_active ON clinics(is_active);
+CREATE INDEX IF NOT EXISTS idx_clinics_name ON clinics(name);
 
 -- =====================================================
 -- 4. USER PROFILES TABLE (extends auth.users)
 -- =====================================================
-CREATE TABLE IF NOT EXISTSuser_profiles (
+CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) NOT NULL UNIQUE,
     role VARCHAR(20) DEFAULT 'public' CHECK (role IN ('admin', 'clinic', 'public')),
@@ -71,13 +71,13 @@ CREATE TABLE IF NOT EXISTSuser_profiles (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTSidx_user_profiles_role ON user_profiles(role);
-CREATE INDEX IF NOT EXISTSidx_user_profiles_clinic ON user_profiles(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON user_profiles(role);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_clinic ON user_profiles(clinic_id);
 
 -- =====================================================
 -- 5. CARDS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTScards (
+CREATE TABLE IF NOT EXISTS cards (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     card_code VARCHAR(12) NOT NULL UNIQUE, -- MC + 10 characters
     patient_name VARCHAR(100) NOT NULL,
@@ -92,15 +92,15 @@ CREATE TABLE IF NOT EXISTScards (
 );
 
 -- Create indexes for optimal performance
-CREATE INDEX IF NOT EXISTSidx_cards_code ON cards(card_code);
-CREATE INDEX IF NOT EXISTSidx_cards_clinic ON cards(clinic_id);
-CREATE INDEX IF NOT EXISTSidx_cards_active ON cards(is_active);
-CREATE INDEX IF NOT EXISTSidx_cards_created_at ON cards(created_at);
+CREATE INDEX IF NOT EXISTS idx_cards_code ON cards(card_code);
+CREATE INDEX IF NOT EXISTS idx_cards_clinic ON cards(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_cards_active ON cards(is_active);
+CREATE INDEX IF NOT EXISTS idx_cards_created_at ON cards(created_at);
 
 -- =====================================================
 -- 6. CARD PERKS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTScard_perks (
+CREATE TABLE IF NOT EXISTS card_perks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     perk_name VARCHAR(100) NOT NULL,
@@ -113,14 +113,14 @@ CREATE TABLE IF NOT EXISTScard_perks (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTSidx_card_perks_card_id ON card_perks(card_id);
-CREATE INDEX IF NOT EXISTSidx_card_perks_redeemed ON card_perks(is_redeemed);
-CREATE INDEX IF NOT EXISTSidx_card_perks_category ON card_perks(perk_category);
+CREATE INDEX IF NOT EXISTS idx_card_perks_card_id ON card_perks(card_id);
+CREATE INDEX IF NOT EXISTS idx_card_perks_redeemed ON card_perks(is_redeemed);
+CREATE INDEX IF NOT EXISTS idx_card_perks_category ON card_perks(perk_category);
 
 -- =====================================================
 -- 7. APPOINTMENTS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTSappointments (
+CREATE TABLE IF NOT EXISTS appointments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     clinic_id UUID NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
@@ -134,15 +134,15 @@ CREATE TABLE IF NOT EXISTSappointments (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTSidx_appointments_card_id ON appointments(card_id);
-CREATE INDEX IF NOT EXISTSidx_appointments_clinic_id ON appointments(clinic_id);
-CREATE INDEX IF NOT EXISTSidx_appointments_date ON appointments(requested_date);
-CREATE INDEX IF NOT EXISTSidx_appointments_status ON appointments(status);
+CREATE INDEX IF NOT EXISTS idx_appointments_card_id ON appointments(card_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_clinic_id ON appointments(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(requested_date);
+CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
 
 -- =====================================================
 -- 8. PERK REDEMPTIONS TABLE (Audit trail)
 -- =====================================================
-CREATE TABLE IF NOT EXISTSperk_redemptions (
+CREATE TABLE IF NOT EXISTS perk_redemptions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     perk_id UUID NOT NULL REFERENCES card_perks(id) ON DELETE CASCADE,
     redeemed_by UUID NOT NULL REFERENCES auth.users(id),
@@ -151,49 +151,22 @@ CREATE TABLE IF NOT EXISTSperk_redemptions (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTSidx_perk_redemptions_perk_id ON perk_redemptions(perk_id);
-CREATE INDEX IF NOT EXISTSidx_perk_redemptions_user ON perk_redemptions(redeemed_by);
+CREATE INDEX IF NOT EXISTS idx_perk_redemptions_perk_id ON perk_redemptions(perk_id);
+CREATE INDEX IF NOT EXISTS idx_perk_redemptions_user ON perk_redemptions(redeemed_by);
 
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- =====================================================
 
 -- Enable RLS on all tables (safe to run multiple times)
-DO $$
-BEGIN
-    -- Enable RLS only if not already enabled
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'regions' AND relrowsecurity = true) THEN
-        ALTER TABLE regions ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'clinic_codes' AND relrowsecurity = true) THEN
-        ALTER TABLE clinic_codes ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'clinics' AND relrowsecurity = true) THEN
-        ALTER TABLE clinics ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'user_profiles' AND relrowsecurity = true) THEN
-        ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'cards' AND relrowsecurity = true) THEN
-        ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'card_perks' AND relrowsecurity = true) THEN
-        ALTER TABLE card_perks ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'appointments' AND relrowsecurity = true) THEN
-        ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'perk_redemptions' AND relrowsecurity = true) THEN
-        ALTER TABLE perk_redemptions ENABLE ROW LEVEL SECURITY;
-    END IF;
-END $$;
+ALTER TABLE regions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clinic_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clinics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE card_perks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE perk_redemptions ENABLE ROW LEVEL SECURITY;
 
 -- Regions: Public read access
 DROP POLICY IF EXISTS "Regions are publicly readable" ON regions;
