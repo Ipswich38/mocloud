@@ -27,7 +27,7 @@ Complete guide to deploy the MOC Card Generation System on Supabase and Vercel.
 3. Create a new query
 4. Copy and paste the entire content from:
    ```
-   database/supabase-bulletproof-final.sql
+   database/supabase-expert-solution.sql
    ```
 5. Click **Run** to execute the schema
 
