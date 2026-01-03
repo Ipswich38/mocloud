@@ -68,10 +68,10 @@ export function CardLookupForm() {
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Look Up Your Dental Benefits Card
+            Card Lookup
           </h2>
           <p className="text-gray-600">
-            Enter your 12-character card code to access your benefits and appointment history
+            Enter your card code
           </p>
         </div>
 
@@ -113,12 +113,12 @@ export function CardLookupForm() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Looking up card...
+                  Searching...
                 </>
               ) : (
                 <>
                   <Search className="mr-2 h-5 w-5" />
-                  Look Up Card
+                  Search
                 </>
               )}
             </Button>
@@ -131,21 +131,11 @@ export function CardLookupForm() {
               variant="outline"
               className="w-full"
             >
-              Look Up Another Card
+              Search Another
             </Button>
           </div>
         )}
 
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <h3 className="text-sm font-semibold text-blue-900 mb-2">
-            Need Help?
-          </h3>
-          <p className="text-sm text-blue-800">
-            If you can't find your card code or need assistance, please contact your
-            dental clinic or call our support line at{' '}
-            <span className="font-medium">+63 (2) 8123-4567</span>.
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -9,10 +9,8 @@ export function HeroSection() {
             <span className="block">MOCARDS</span>
             <span className="block text-blue-600">Dental Benefits Made Simple</span>
           </h1>
-          <p className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
-            Streamlined dental benefits card management system for clinics and patients
-            across the Philippines. Look up your card, manage appointments, and access
-            your dental benefits with ease.
+          <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-600">
+            Digital dental benefits management. Look up cards, book appointments.
           </p>
         </div>
 
@@ -22,52 +20,43 @@ export function HeroSection() {
             <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center">
               <CreditCard className="h-6 w-6 text-white" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">Easy Card Lookup</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Enter your card code to instantly access your benefits and appointment history
-            </p>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">Card Lookup</h3>
+            <p className="mt-2 text-sm text-gray-600">Access your benefits instantly</p>
           </div>
 
           <div className="text-center">
             <div className="mx-auto h-12 w-12 bg-green-600 rounded-lg flex items-center justify-center">
               <Shield className="h-6 w-6 text-white" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">Secure & Private</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Your data is protected with enterprise-grade security and privacy controls
-            </p>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">Secure</h3>
+            <p className="mt-2 text-sm text-gray-600">Protected data and privacy</p>
           </div>
 
           <div className="text-center">
             <div className="mx-auto h-12 w-12 bg-purple-600 rounded-lg flex items-center justify-center">
               <Clock className="h-6 w-6 text-white" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">Quick Appointments</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Book appointments with participating clinics directly through your card
-            </p>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">Appointments</h3>
+            <p className="mt-2 text-sm text-gray-600">Book with clinics directly</p>
           </div>
 
           <div className="text-center">
             <div className="mx-auto h-12 w-12 bg-orange-600 rounded-lg flex items-center justify-center">
               <Users className="h-6 w-6 text-white" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">Regional Coverage</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Serving Cavite, Batangas, Laguna, and MIMAROPA regions
-            </p>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">Wide Coverage</h3>
+            <p className="mt-2 text-sm text-gray-600">Multiple regions supported</p>
           </div>
         </div>
 
         {/* CTA Section */}
         <div className="mt-16 text-center">
           <p className="text-lg text-gray-600 mb-8">
-            Ready to access your dental benefits? Enter your card code below.
+            Enter your card code below
           </p>
           <div className="inline-flex items-center space-x-2 text-sm text-gray-500">
-            <span>Card codes start with</span>
-            <span className="bg-gray-100 px-2 py-1 rounded font-mono">MC</span>
-            <span>followed by 10 characters</span>
+            <span>Format:</span>
+            <span className="bg-gray-100 px-2 py-1 rounded font-mono">MC1234567890</span>
           </div>
         </div>
       </div>

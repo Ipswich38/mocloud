@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MOCARDS - Dental Benefits Management",
-  description: "Streamlined dental benefits card management system for clinics and patients",
+  title: "MOCARDS - Dental Benefits",
+  description: "Digital dental benefits management system",
 };
 
 export default function RootLayout({
