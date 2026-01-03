@@ -1,11 +1,11 @@
 -- MOCARDS Database Schema
 -- Dental Benefits Card Management System
+-- Compatible with Supabase managed PostgreSQL
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable UUID extension (Supabase has this enabled by default)
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Enable Row Level Security
-ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
+-- Note: JWT secret is managed by Supabase automatically
 
 -- =====================================================
 -- 1. REGIONS TABLE
