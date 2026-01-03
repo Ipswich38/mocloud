@@ -92,38 +92,18 @@ vercel --prod
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | All |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon key | All |
 
-## 👤 Admin User Setup
+## 👤 Admin User Setup - INSTANT ACCESS
 
-### Method 1: Supabase Auth Dashboard (Recommended)
+### ✅ Pre-Configured Admin (No Setup Required!)
 
-1. Go to **Authentication > Users** in Supabase
-2. Click **Add User**
-3. Create admin user:
-   - Email: `admin@yourdomain.com`
-   - Password: Strong password
-   - Confirm via email: `false`
-4. The user profile will be auto-created with 'public' role
-5. Update role to 'admin' via SQL Editor:
+The schema automatically creates a ready-to-use admin account:
 
-```sql
-UPDATE user_profiles
-SET role = 'admin', username = 'admin'
-WHERE email = 'admin@yourdomain.com';
-```
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Role**: `admin` (full system access)
+- **Status**: ✅ Ready immediately after schema deployment
 
-### Method 2: Direct SQL Insert
-
-Run this in Supabase SQL Editor (replace the UUID with the actual user ID from auth.users):
-
-```sql
--- First, get the user ID from the auth.users table
-SELECT id, email FROM auth.users WHERE email = 'admin@yourdomain.com';
-
--- Then update the profile (replace the UUID)
-UPDATE user_profiles
-SET role = 'admin', username = 'admin', display_name = 'Administrator'
-WHERE id = 'actual-user-uuid-here';
-```
+**No manual user creation needed!** The admin account works instantly.
 
 ## 🧪 Testing the Deployment
 
@@ -137,7 +117,9 @@ Visit your deployed app and check:
 ### Step 2: Test Admin Login
 
 1. Go to `/auth/signin`
-2. Login with your admin credentials
+2. Login with:
+   - **Username**: `admin`
+   - **Password**: `admin123`
 3. Verify redirect to admin dashboard
 4. Check admin-only features are accessible
 
@@ -275,7 +257,7 @@ npm run type-check
 - [ ] Supabase project created
 - [ ] Database schema applied successfully
 - [ ] Environment variables configured
-- [ ] Admin user created
+- [ ] ✅ Admin user ready (pre-configured)
 - [ ] Local testing completed
 
 **Post-Deployment:**

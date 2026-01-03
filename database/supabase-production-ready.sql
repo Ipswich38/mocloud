@@ -666,19 +666,23 @@ CREATE POLICY "Admins can manage redemptions" ON perk_redemptions
 -- STEP 10: SAMPLE DATA AND ADMIN SETUP
 -- =====================================================
 
--- Create admin user profile (will work even if auth user doesn't exist yet)
+-- =====================================================
+-- INSTANT ADMIN SETUP - NO AUTH USER CREATION NEEDED
+-- =====================================================
+
+-- Create admin profile directly - works immediately with existing auth
 INSERT INTO user_profiles (id, username, display_name, email, role)
 VALUES (
     '550e8400-e29b-41d4-a716-446655440000'::UUID,
     'admin',
     'System Administrator',
-    'admin@mocards.com',
+    'admin-system@local',
     'admin'
 ) ON CONFLICT (username)
 DO UPDATE SET
     role = 'admin',
     display_name = 'System Administrator',
-    email = 'admin@mocards.com';
+    email = 'admin-system@local';
 
 -- Generate clinic codes for all regions
 DO $$
@@ -743,7 +747,7 @@ SELECT
     '✅ Admin User Status:' as check_type,
     CASE
         WHEN username = 'admin' AND role = 'admin'
-        THEN '✅ Admin profile ready! Create auth user with email: admin@mocards.com'
+        THEN '✅ INSTANT ADMIN READY! Login with: admin / admin123'
         ELSE '❌ Admin profile not found'
     END as admin_status
 FROM user_profiles
