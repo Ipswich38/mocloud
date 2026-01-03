@@ -74,10 +74,8 @@ export default function AdminDashboard() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600">
-            Welcome back! Here's an overview of your system.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">System overview</p>
         </div>
 
         {/* Quick Stats */}
@@ -142,42 +140,36 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Clinic Management</CardTitle>
+              <CardTitle>Clinics</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
-                Manage dental clinics, assign codes, and monitor clinic activity.
-              </p>
+              <p className="text-gray-600 mb-4">Manage dental clinics</p>
               <Button asChild className="w-full">
-                <a href="/admin/clinics">Manage Clinics</a>
+                <a href="/admin/clinics">Manage</a>
               </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Card Management</CardTitle>
+              <CardTitle>Cards</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
-                View and manage all dental benefit cards in the system.
-              </p>
+              <p className="text-gray-600 mb-4">View benefit cards</p>
               <Button asChild variant="outline" className="w-full">
-                <a href="/admin/cards">View Cards</a>
+                <a href="/admin/cards">View All</a>
               </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>User Management</CardTitle>
+              <CardTitle>Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
-                Manage user roles and clinic assignments.
-              </p>
+              <p className="text-gray-600 mb-4">Manage roles</p>
               <Button asChild variant="outline" className="w-full">
-                <a href="/admin/users">Manage Users</a>
+                <a href="/admin/users">Manage</a>
               </Button>
             </CardContent>
           </Card>
@@ -187,16 +179,14 @@ export default function AdminDashboard() {
               <CardTitle>Appointments</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
-                Monitor appointment requests across all clinics.
-              </p>
+              <p className="text-gray-600 mb-4">Monitor requests</p>
               <div className="flex items-center justify-between">
                 <Button asChild variant="outline">
-                  <a href="/admin/appointments">View All</a>
+                  <a href="/admin/appointments">View</a>
                 </Button>
                 {stats && stats.pendingAppointments > 0 && (
                   <Badge variant="destructive">
-                    {stats.pendingAppointments} pending
+                    {stats.pendingAppointments}
                   </Badge>
                 )}
               </div>
@@ -205,28 +195,12 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>System Settings</CardTitle>
+              <CardTitle>Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
-                Configure system settings and change your password.
-              </p>
+              <p className="text-gray-600 mb-4">Account settings</p>
               <Button asChild variant="outline" className="w-full">
-                <a href="/admin/settings">Settings</a>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Generate reports and analytics.
-              </p>
-              <Button variant="outline" className="w-full" disabled>
-                Coming Soon
+                <a href="/admin/settings">Configure</a>
               </Button>
             </CardContent>
           </Card>

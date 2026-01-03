@@ -77,6 +77,7 @@ export interface PerkRedemption {
 // Auth types
 export interface UserProfile {
   id: string;
+  username: string;
   email: string;
   role: 'admin' | 'clinic' | 'public';
   clinic_id?: string;

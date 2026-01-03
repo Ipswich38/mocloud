@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
+import { authService } from '@/lib/auth/authService';
 import type { UserProfile } from '@/types';
 
 interface AuthContextType {
@@ -10,8 +11,8 @@ interface AuthContextType {
   profile: UserProfile | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (usernameOrEmail: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (username: string, email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -56,42 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Sign in function
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        return { error: error.message };
-      }
-
-      return { error: null };
-    } catch (error) {
-      return { error: 'An unexpected error occurred' };
-    }
+  const signIn = async (usernameOrEmail: string, password: string) => {
+    return authService.signIn(usernameOrEmail, password);
   };
 
   // Sign up function
-  const signUp = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-
-      if (error) {
-        return { error: error.message };
-      }
-
-      return { error: null };
-    } catch (error) {
-      return { error: 'An unexpected error occurred' };
-    }
+  const signUp = async (username: string, email: string, password: string) => {
+    return authService.signUp(username, email, password);
   };
 
   // Sign out function

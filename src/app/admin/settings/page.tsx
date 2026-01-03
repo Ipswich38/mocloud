@@ -42,7 +42,8 @@ export default function AdminSettingsPage() {
     }
 
     try {
-      // First verify current password by attempting to sign in
+      // Verify current password by attempting to sign in with username
+      const username = profile?.username || '';
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user?.email || '',
         password: currentPassword
@@ -89,10 +90,8 @@ export default function AdminSettingsPage() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Settings</h1>
-          <p className="mt-2 text-gray-600">
-            Manage your admin account settings and security
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="mt-2 text-gray-600">Admin account settings</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -107,17 +106,19 @@ export default function AdminSettingsPage() {
             <CardContent>
               <div className="space-y-4">
                 <div>
+                  <Label className="text-sm font-medium text-gray-700">Username</Label>
+                  <div className="mt-1 text-sm text-gray-900">@{profile?.username}</div>
+                </div>
+                <div>
                   <Label className="text-sm font-medium text-gray-700">Email</Label>
-                  <div className="mt-1 text-sm text-gray-900">{user?.email}</div>
+                  <div className="mt-1 text-sm text-gray-600">{user?.email}</div>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Role</Label>
-                  <div className="mt-1 text-sm text-gray-900 capitalize">{profile?.role}</div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Account Created</Label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
+                  <div className="mt-1">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs capitalize">
+                      {profile?.role}
+                    </span>
                   </div>
                 </div>
               </div>

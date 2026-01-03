@@ -72,9 +72,9 @@ export function Navigation() {
               {user ? (
                 <div className="flex items-center space-x-3">
                   <span className="text-sm text-gray-600">
-                    {user.email}
-                    {profile?.role && (
-                      <span className="ml-1 px-2 py-1 bg-gray-100 rounded text-xs">
+                    @{profile?.username || 'user'}
+                    {profile?.role && profile.role !== 'public' && (
+                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
                         {profile.role}
                       </span>
                     )}
@@ -83,10 +83,8 @@ export function Navigation() {
                     variant="outline"
                     size="sm"
                     onClick={handleSignOut}
-                    className="flex items-center space-x-1"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
                   </Button>
                 </div>
               ) : (
@@ -149,9 +147,9 @@ export function Navigation() {
               {user ? (
                 <div className="space-y-3">
                   <div className="px-3">
-                    <p className="text-sm font-medium text-gray-900">{user.email}</p>
-                    {profile?.role && (
-                      <p className="text-sm text-gray-600 capitalize">{profile.role}</p>
+                    <p className="text-sm font-medium text-gray-900">@{profile?.username || 'user'}</p>
+                    {profile?.role && profile.role !== 'public' && (
+                      <p className="text-xs text-blue-600 capitalize">{profile.role}</p>
                     )}
                   </div>
                   <Button

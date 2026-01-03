@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 export default function SignUpPage() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,19 +35,18 @@ export default function SignUpPage() {
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError('Password must be at least 6 characters');
       setLoading(false);
       return;
     }
 
     try {
-      const { error: signUpError } = await signUp(email, password);
+      const { error: signUpError } = await signUp(username, email, password);
 
       if (signUpError) {
         setError(signUpError);
       } else {
         setSuccess(true);
-        // Don't redirect automatically - user needs to verify email
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -57,28 +57,22 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">MOCARDS</h1>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white p-4">
+        <div className="max-w-sm w-full">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">MOCARDS</h1>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Check your email</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Alert>
-                <AlertDescription>
-                  We've sent you a confirmation email. Please check your inbox and click the link to verify your account.
-                </AlertDescription>
-              </Alert>
-
-              <div className="mt-4 text-center">
-                <Link href="/auth/signin" className="text-blue-600 hover:text-blue-500">
-                  Back to Sign In
-                </Link>
-              </div>
+          <Card className="shadow-lg border-0">
+            <CardContent className="p-6 text-center">
+              <div className="mb-4">✅</div>
+              <h3 className="font-semibold mb-2">Check your email</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                We sent a confirmation link to verify your account.
+              </p>
+              <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 text-sm">
+                Back to Sign In
+              </Link>
             </CardContent>
           </Card>
         </div>
@@ -87,77 +81,79 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">MOCARDS</h1>
-          <p className="mt-2 text-gray-600">Create your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white p-4">
+      <div className="max-w-sm w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-blue-600 mb-2">MOCARDS</h1>
+          <p className="text-gray-500">Create account</p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="shadow-lg border-0">
+          <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="text-sm">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
               <div>
-                <Label htmlFor="email">Email address</Label>
                 <Input
-                  id="email"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  placeholder="Username"
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="Enter your email"
+                  placeholder="Email address"
+                  className="h-12"
                 />
               </div>
 
               <div>
-                <Label htmlFor="password">Password</Label>
                 <Input
-                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Create a password (min 6 characters)"
+                  placeholder="Password (min 6 characters)"
+                  className="h-12"
                 />
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
-                  id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  placeholder="Confirm your password"
+                  placeholder="Confirm password"
+                  className="h-12"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full"
+                className="w-full h-12 text-base"
               >
-                {loading ? 'Creating account...' : 'Sign Up'}
+                {loading ? 'Creating...' : 'Sign Up'}
               </Button>
             </form>
 
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link href="/auth/signin" className="text-blue-600 hover:text-blue-500">
-                  Sign in
-                </Link>
-              </p>
+            <div className="mt-6 text-center">
+              <Link href="/auth/signin" className="text-sm text-blue-600 hover:text-blue-700">
+                Already have an account?
+              </Link>
             </div>
           </CardContent>
         </Card>

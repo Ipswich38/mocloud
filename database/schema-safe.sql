@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS clinics (
 -- 4. USER PROFILES TABLE
 CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     role VARCHAR(20) DEFAULT 'public' CHECK (role IN ('admin', 'clinic', 'public')),
     clinic_id UUID REFERENCES clinics(id) ON DELETE SET NULL,
@@ -349,8 +350,8 @@ CREATE TRIGGER update_appointments_updated_at
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.user_profiles (id, email, role)
-    VALUES (NEW.id, NEW.email, 'public');
+    INSERT INTO public.user_profiles (id, username, email, role)
+    VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)), NEW.email, 'public');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -397,3 +398,77 @@ SELECT 'Clinic codes:' as info, COUNT(*) as total,
        COUNT(CASE WHEN is_assigned THEN 1 END) as assigned,
        COUNT(CASE WHEN NOT is_assigned THEN 1 END) as available
 FROM clinic_codes;
+
+-- =====================================================
+-- CREATE DEFAULT ADMIN USER
+-- =====================================================
+-- Note: This creates the admin user in auth.users and user_profiles
+-- Default credentials: username = admin, password = admin123
+-- Change password after first login!
+
+DO $$
+DECLARE
+    admin_id UUID;
+    admin_exists BOOLEAN;
+BEGIN
+    -- Check if admin user already exists
+    SELECT EXISTS(
+        SELECT 1 FROM user_profiles
+        WHERE username = 'admin' AND role = 'admin'
+    ) INTO admin_exists;
+
+    IF NOT admin_exists THEN
+        -- Generate a UUID for the admin user
+        admin_id := gen_random_uuid();
+
+        -- Insert into auth.users (simplified for demo)
+        -- In production, use Supabase dashboard to create this user
+        INSERT INTO auth.users (
+            id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at,
+            confirmation_token,
+            recovery_token
+        ) VALUES (
+            admin_id,
+            'authenticated',
+            'authenticated',
+            'admin@mocards.com',
+            crypt('admin123', gen_salt('bf')), -- Password: admin123
+            NOW(),
+            '{"provider":"email","providers":["email"]}',
+            '{"username":"admin"}',
+            NOW(),
+            NOW(),
+            '',
+            ''
+        ) ON CONFLICT (email) DO NOTHING;
+
+        -- Insert into user_profiles
+        INSERT INTO user_profiles (id, username, email, role)
+        VALUES (admin_id, 'admin', 'admin@mocards.com', 'admin')
+        ON CONFLICT (username) DO NOTHING;
+
+        RAISE NOTICE 'Admin user created with username: admin, password: admin123';
+    ELSE
+        RAISE NOTICE 'Admin user already exists';
+    END IF;
+EXCEPTION
+    WHEN others THEN
+        -- If auth.users insert fails (which it will in managed Supabase),
+        -- just create the profile entry for manual user creation
+        INSERT INTO user_profiles (id, username, email, role)
+        SELECT id, 'admin', 'admin@mocards.com', 'admin'
+        FROM auth.users
+        WHERE email = 'admin@mocards.com'
+        ON CONFLICT (username) DO UPDATE SET role = 'admin';
+
+        RAISE NOTICE 'Please create admin user manually in Supabase dashboard with email: admin@mocards.com';
+END $$;
