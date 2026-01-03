@@ -2,7 +2,7 @@
 
 This directory contains the database schema and setup scripts for the MOCARDS dental benefits management system, optimized for Supabase.
 
-## 🚀 Quick Setup (Recommended)
+## 🚀 Quick Setup (Single File)
 
 ### 1. Create Supabase Project
 
@@ -19,24 +19,21 @@ This directory contains the database schema and setup scripts for the MOCARDS de
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    ```
 
-### 3. Run Database Setup (Step by Step)
+### 3. Run Database Setup (One Command)
 
-**Option A: All-in-one (if no errors)**
 1. Open your Supabase project dashboard
-2. Go to the SQL Editor
-3. Copy and paste the contents of `schema.sql`
-4. Execute the script
+2. Go to the **SQL Editor**
+3. Copy and paste the **entire contents** of `schema.sql`
+4. Click **Run** to execute everything at once
 
-**Option B: Step by Step (Recommended)**
+The unified schema includes:
+- ✅ **Tables and indexes creation**
+- ✅ **Row Level Security policies**
+- ✅ **Functions and triggers**
+- ✅ **Sample data generation**
+- ✅ **Verification queries**
 
-Run these files in order in the Supabase SQL Editor:
-
-1. **`supabase-setup.sql`** - Creates all tables and indexes
-2. **`supabase-rls-policies.sql`** - Sets up Row Level Security
-3. **`supabase-functions.sql`** - Creates functions and triggers
-4. **`supabase-sample-data.sql`** - Generates sample data
-
-This approach helps identify any issues step by step.
+**That's it!** Everything will be set up in one go.
 
 ### 4. Create Admin User
 
@@ -74,11 +71,13 @@ This approach helps identify any issues step by step.
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| `schema.sql` | Complete schema (legacy) | If you want everything in one file |
-| `supabase-setup.sql` | Tables and indexes only | Start here - creates basic structure |
-| `supabase-rls-policies.sql` | Security policies | After tables are created |
-| `supabase-functions.sql` | Functions and triggers | After RLS policies |
-| `supabase-sample-data.sql` | Test data generation | For development/testing |
+| **`schema.sql`** | **Complete unified setup** | **Use this - everything in one file!** |
+| `supabase-setup.sql` | Tables and indexes only | Alternative: step-by-step approach |
+| `supabase-rls-policies.sql` | Security policies | Alternative: step-by-step approach |
+| `supabase-functions.sql` | Functions and triggers | Alternative: step-by-step approach |
+| `supabase-sample-data.sql` | Test data generation | Alternative: step-by-step approach |
+
+**📝 Note:** The individual `supabase-*.sql` files are kept for reference and debugging, but `schema.sql` is now the recommended all-in-one solution.
 
 ### Verification Commands
 

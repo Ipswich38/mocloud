@@ -1,17 +1,14 @@
 -- MOCARDS Database Schema
 -- Dental Benefits Card Management System
--- Compatible with Supabase managed PostgreSQL
+-- Complete setup for Supabase - Run this entire file in Supabase SQL Editor
 
--- Enable UUID extension (Supabase has this enabled by default)
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Note: JWT secret is managed by Supabase automatically
+-- Note: Supabase manages UUID extension and JWT secrets automatically
 
 -- =====================================================
 -- 1. REGIONS TABLE
 -- =====================================================
 CREATE TABLE regions (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     code VARCHAR(3) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -28,7 +25,7 @@ INSERT INTO regions (code, name) VALUES
 -- 2. CLINIC CODES TABLE
 -- =====================================================
 CREATE TABLE clinic_codes (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     region_id UUID NOT NULL REFERENCES regions(id) ON DELETE CASCADE,
     code VARCHAR(6) NOT NULL UNIQUE, -- Format: CVT001, BTG002, etc.
     is_assigned BOOLEAN DEFAULT FALSE,
@@ -43,7 +40,7 @@ CREATE INDEX idx_clinic_codes_assigned ON clinic_codes(is_assigned);
 -- 3. CLINICS TABLE
 -- =====================================================
 CREATE TABLE clinics (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     clinic_code_id UUID NOT NULL REFERENCES clinic_codes(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     address TEXT NOT NULL,
@@ -79,7 +76,7 @@ CREATE INDEX idx_user_profiles_clinic ON user_profiles(clinic_id);
 -- 5. CARDS TABLE
 -- =====================================================
 CREATE TABLE cards (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     card_code VARCHAR(12) NOT NULL UNIQUE, -- MC + 10 characters
     patient_name VARCHAR(100) NOT NULL,
     patient_birthdate DATE NOT NULL,
@@ -102,7 +99,7 @@ CREATE INDEX idx_cards_created_at ON cards(created_at);
 -- 6. CARD PERKS TABLE
 -- =====================================================
 CREATE TABLE card_perks (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     perk_name VARCHAR(100) NOT NULL,
     perk_description TEXT NOT NULL,
@@ -122,7 +119,7 @@ CREATE INDEX idx_card_perks_category ON card_perks(perk_category);
 -- 7. APPOINTMENTS TABLE
 -- =====================================================
 CREATE TABLE appointments (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     clinic_id UUID NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
     requested_date DATE NOT NULL,
@@ -144,7 +141,7 @@ CREATE INDEX idx_appointments_status ON appointments(status);
 -- 8. PERK REDEMPTIONS TABLE (Audit trail)
 -- =====================================================
 CREATE TABLE perk_redemptions (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     perk_id UUID NOT NULL REFERENCES card_perks(id) ON DELETE CASCADE,
     redeemed_by UUID NOT NULL REFERENCES auth.users(id),
     redemption_notes TEXT,
@@ -371,3 +368,33 @@ BEGIN
         END LOOP;
     END LOOP;
 END $$;
+
+-- =====================================================
+-- VERIFICATION QUERIES (Optional - Run to verify setup)
+-- =====================================================
+
+-- Check all tables exist
+SELECT 'Tables created successfully!' as status,
+       COUNT(*) as table_count
+FROM information_schema.tables
+WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+
+-- Check regions are populated
+SELECT 'Regions populated:' as status, * FROM regions ORDER BY code;
+
+-- Check clinic codes generated (should show 16 per region = 64 total)
+SELECT 'Clinic codes generated:' as status,
+       r.code as region_code,
+       r.name as region_name,
+       COUNT(cc.id) as codes_generated
+FROM regions r
+LEFT JOIN clinic_codes cc ON r.id = cc.region_id
+GROUP BY r.id, r.code, r.name
+ORDER BY r.code;
+
+-- Total clinic codes summary
+SELECT 'Total clinic codes:' as status,
+       COUNT(*) as total_codes,
+       COUNT(CASE WHEN is_assigned THEN 1 END) as assigned_codes,
+       COUNT(CASE WHEN NOT is_assigned THEN 1 END) as available_codes
+FROM clinic_codes;
