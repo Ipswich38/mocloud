@@ -64,6 +64,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign out function
   const signOut = async () => {
     try {
+      // Clear admin session if it exists
+      localStorage.removeItem('mocards_admin_session');
+
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
@@ -77,7 +80,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Get initial session
+        // Check for admin session first
+        const adminSessionStr = localStorage.getItem('mocards_admin_session');
+        if (adminSessionStr) {
+          const adminSession = JSON.parse(adminSessionStr);
+          setUser(adminSession.user);
+          setProfile(adminSession.profile);
+          setLoading(false);
+          return;
+        }
+
+        // Get initial session for regular users
         const { data: { session: initialSession } } = await supabase.auth.getSession();
 
         setSession(initialSession);

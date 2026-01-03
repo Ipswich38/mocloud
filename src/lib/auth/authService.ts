@@ -3,74 +3,81 @@ import { createClient } from '@/lib/supabase';
 export class AuthService {
   private supabase = createClient();
 
-  // Auto-setup admin user if it doesn't exist
-  private async autoSetupAdmin() {
-    try {
-      // Check if admin profile already exists
-      const { data: existingProfile } = await this.supabase
-        .from('user_profiles')
-        .select('id, username')
-        .eq('username', 'admin')
-        .single();
+  // Built-in admin bypass for immediate access
+  private isBuiltinAdmin(username: string, password: string): boolean {
+    return username === 'admin' && password === 'admin123';
+  }
 
-      if (existingProfile) {
-        return; // Admin already exists
-      }
+  // Create a session for built-in admin
+  private async createAdminSession() {
+    // Try to find existing admin user or create one
+    let { data: existingProfile } = await this.supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('username', 'admin')
+      .eq('role', 'admin')
+      .single();
 
-      // Create admin user in auth.users with a generated email
-      const adminEmail = `admin-${Date.now()}@local.mocards`;
-      const { data: authData, error: authError } = await this.supabase.auth.signUp({
-        email: adminEmail,
-        password: 'admin123',
-        options: {
-          data: {
-            username: 'admin',
-            display_name: 'Administrator'
-          }
-        }
-      });
+    if (!existingProfile) {
+      // Create admin profile with a fixed UUID
+      const adminId = '550e8400-e29b-41d4-a716-446655440000'; // Fixed UUID for admin
+      const adminEmail = `admin-system@local-${Date.now()}`;
 
-      if (authError || !authData.user) {
-        console.warn('Could not auto-create auth user:', authError?.message);
-        return;
-      }
-
-      // Create user profile
-      await this.supabase
+      // Insert admin profile directly
+      const { error: profileError } = await this.supabase
         .from('user_profiles')
         .insert({
-          id: authData.user.id,
+          id: adminId,
           username: 'admin',
           display_name: 'Administrator',
           email: adminEmail,
           role: 'admin'
         });
 
-    } catch (error) {
-      console.warn('Auto-setup admin failed:', error);
+      if (!profileError) {
+        existingProfile = {
+          id: adminId,
+          username: 'admin',
+          display_name: 'Administrator',
+          email: adminEmail,
+          role: 'admin',
+          clinic_id: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      }
     }
+
+    return existingProfile;
   }
 
   // Sign in with username or email
   async signIn(usernameOrEmail: string, password: string) {
     try {
-      // Auto-setup admin if needed (for first-time setup)
-      if (usernameOrEmail === 'admin') {
-        await this.autoSetupAdmin();
+      // Built-in admin check - bypass all auth for admin/admin123
+      if (this.isBuiltinAdmin(usernameOrEmail, password)) {
+        const adminProfile = await this.createAdminSession();
+        if (adminProfile) {
+          // Store admin session locally for the app to use
+          localStorage.setItem('mocards_admin_session', JSON.stringify({
+            user: { id: adminProfile.id, email: adminProfile.email },
+            profile: adminProfile
+          }));
+          return { error: null };
+        }
+        return { error: 'Admin setup failed' };
       }
 
-      // Check if input looks like email
+      // Regular auth flow for other users
       const isEmail = usernameOrEmail.includes('@');
 
       if (isEmail) {
-        // Direct email login
         const { error } = await this.supabase.auth.signInWithPassword({
           email: usernameOrEmail,
           password
         });
         return { error: error?.message || null };
       } else {
-        // Username login - first get email from username
         const { data: profile } = await this.supabase
           .from('user_profiles')
           .select('email')

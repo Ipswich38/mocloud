@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS clinics (
 
 -- 4. USER PROFILES TABLE
 CREATE TABLE IF NOT EXISTS user_profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(50) NOT NULL UNIQUE,
     display_name VARCHAR(255),
     email VARCHAR(255) NOT NULL UNIQUE,

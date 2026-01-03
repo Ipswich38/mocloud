@@ -30,7 +30,12 @@ export default function SignInPage() {
       if (signInError) {
         setError(signInError);
       } else {
-        router.push('/dashboard');
+        // For admin login, refresh the page to load the new session
+        if (username === 'admin') {
+          window.location.href = '/dashboard';
+        } else {
+          router.push('/dashboard');
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred');
