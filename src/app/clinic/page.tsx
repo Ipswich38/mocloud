@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRequireClinic } from '@/lib/auth/AuthProvider';
+import { useRequireAdmin } from '@/lib/auth/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { createClient } from '@/lib/supabase';
 import { ClinicLayout } from '@/components/clinic/ClinicLayout';
 
 interface ClinicStats {
@@ -31,77 +30,31 @@ interface ClinicInfo {
 }
 
 export default function ClinicDashboard() {
-  const { profile, loading } = useRequireClinic();
-  const [stats, setStats] = useState<ClinicStats | null>(null);
-  const [clinicInfo, setClinicInfo] = useState<ClinicInfo | null>(null);
-  const [loadingData, setLoadingData] = useState(true);
+  const { profile, loading } = useRequireAdmin();
 
-  const supabase = createClient();
+  // Mock data for demo - admin can see all clinic operations
+  const stats: ClinicStats = {
+    totalCards: 145,
+    totalAppointments: 89,
+    pendingAppointments: 12,
+    completedAppointments: 77
+  };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!profile?.clinic_id) return;
-
-      try {
-        const [
-          { data: clinicData },
-          { count: totalCards },
-          { count: totalAppointments },
-          { count: pendingAppointments },
-          { count: completedAppointments }
-        ] = await Promise.all([
-          supabase
-            .from('clinics')
-            .select(`
-              *,
-              clinic_codes (
-                code,
-                regions (
-                  name,
-                  code
-                )
-              )
-            `)
-            .eq('id', profile.clinic_id)
-            .single(),
-          supabase
-            .from('cards')
-            .select('*', { count: 'exact', head: true })
-            .eq('clinic_id', profile.clinic_id),
-          supabase
-            .from('appointments')
-            .select('*', { count: 'exact', head: true })
-            .eq('clinic_id', profile.clinic_id),
-          supabase
-            .from('appointments')
-            .select('*', { count: 'exact', head: true })
-            .eq('clinic_id', profile.clinic_id)
-            .eq('status', 'pending'),
-          supabase
-            .from('appointments')
-            .select('*', { count: 'exact', head: true })
-            .eq('clinic_id', profile.clinic_id)
-            .eq('status', 'completed')
-        ]);
-
-        setClinicInfo(clinicData);
-        setStats({
-          totalCards: totalCards || 0,
-          totalAppointments: totalAppointments || 0,
-          pendingAppointments: pendingAppointments || 0,
-          completedAppointments: completedAppointments || 0
-        });
-      } catch (error) {
-        console.error('Error fetching clinic data:', error);
-      } finally {
-        setLoadingData(false);
+  const clinicInfo: ClinicInfo = {
+    id: 'demo-clinic',
+    name: 'MOCARDS Admin Portal',
+    address: 'Philippines - National Coverage',
+    contact_email: 'admin@mocards.com',
+    contact_phone: '+63 123 456 7890',
+    contact_person: 'Administrator',
+    clinic_codes: {
+      code: 'ADM001',
+      regions: {
+        name: 'All Regions',
+        code: 'ALL'
       }
-    };
-
-    if (profile) {
-      fetchData();
     }
-  }, [profile, supabase]);
+  };
 
   if (loading) {
     return (
@@ -119,18 +72,16 @@ export default function ClinicDashboard() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {clinicInfo ? `Welcome, ${clinicInfo.name}` : 'Clinic Dashboard'}
+            Welcome, {clinicInfo.name}
           </h1>
-          {clinicInfo && (
-            <div className="mt-2 space-y-1">
-              <p className="text-gray-600">
-                Clinic Code: <Badge variant="outline">{clinicInfo.clinic_codes.code}</Badge>
-              </p>
-              <p className="text-sm text-gray-500">
-                Region: {clinicInfo.clinic_codes.regions.name}
-              </p>
-            </div>
-          )}
+          <div className="mt-2 space-y-1">
+            <p className="text-gray-600">
+              Admin Code: <Badge variant="outline">{clinicInfo.clinic_codes.code}</Badge>
+            </p>
+            <p className="text-sm text-gray-500">
+              Coverage: {clinicInfo.clinic_codes.regions.name}
+            </p>
+          </div>
         </div>
 
         {/* Quick Stats */}
@@ -141,7 +92,7 @@ export default function ClinicDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loadingData ? '...' : stats?.totalCards}
+                {stats.totalCards}
               </div>
             </CardContent>
           </Card>
@@ -152,7 +103,7 @@ export default function ClinicDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loadingData ? '...' : stats?.totalAppointments}
+                {stats.totalAppointments}
               </div>
             </CardContent>
           </Card>
@@ -163,7 +114,7 @@ export default function ClinicDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">
-                {loadingData ? '...' : stats?.pendingAppointments}
+                {stats.pendingAppointments}
               </div>
             </CardContent>
           </Card>
@@ -174,7 +125,7 @@ export default function ClinicDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {loadingData ? '...' : stats?.completedAppointments}
+                {stats.completedAppointments}
               </div>
             </CardContent>
           </Card>
@@ -214,7 +165,7 @@ export default function ClinicDashboard() {
                 >
                   View Appointments
                 </a>
-                {stats && stats.pendingAppointments > 0 && (
+                {stats.pendingAppointments > 0 && (
                   <Badge variant="destructive">
                     {stats.pendingAppointments} pending
                   </Badge>
@@ -241,30 +192,28 @@ export default function ClinicDashboard() {
           </Card>
         </div>
 
-        {/* Clinic Information */}
-        {clinicInfo && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Clinic Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Contact Details</h4>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Contact Person:</strong> {clinicInfo.contact_person}</p>
-                    <p><strong>Email:</strong> {clinicInfo.contact_email}</p>
-                    <p><strong>Phone:</strong> {clinicInfo.contact_phone}</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Location</h4>
-                  <p className="text-sm">{clinicInfo.address}</p>
+        {/* Admin Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Admin Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Contact Details</h4>
+                <div className="space-y-2 text-sm">
+                  <p><strong>Contact Person:</strong> {clinicInfo.contact_person}</p>
+                  <p><strong>Email:</strong> {clinicInfo.contact_email}</p>
+                  <p><strong>Phone:</strong> {clinicInfo.contact_phone}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Coverage Area</h4>
+                <p className="text-sm">{clinicInfo.address}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </ClinicLayout>
   );
