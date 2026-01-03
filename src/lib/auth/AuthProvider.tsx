@@ -17,7 +17,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = () => {
+      const sessionData = localStorage.getItem('admin_session');
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          setUser(session.user);
+          setProfile(session.profile);
+        } catch (error) {
+          localStorage.removeItem('admin_session');
+        }
+      }
+      setLoading(false);
+    };
+
+    checkSession();
+  }, []);
 
   // Sign in function - pure client side
   const signIn = async (usernameOrEmail: string, password: string) => {
@@ -30,6 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (result.isAdmin && result.adminSession) {
       setUser(result.adminSession.user);
       setProfile(result.adminSession.profile);
+      // Persist session to localStorage
+      localStorage.setItem('admin_session', JSON.stringify(result.adminSession));
     }
 
     return { error: null };
@@ -39,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     setUser(null);
     setProfile(null);
+    localStorage.removeItem('admin_session');
   };
 
   const value = {
@@ -81,7 +103,12 @@ export function useRequireAdmin() {
   const { user, profile, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && (!user || profile?.role !== 'admin')) {
+    // Only redirect if we're sure we've finished loading and no admin session
+    if (!loading && !user && !profile) {
+      window.location.href = '/auth/signin';
+    }
+    // If we have a user but they're not admin, redirect
+    if (!loading && user && profile && profile.role !== 'admin') {
       window.location.href = '/auth/signin';
     }
   }, [user, profile, loading]);

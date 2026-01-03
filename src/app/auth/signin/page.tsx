@@ -30,9 +30,9 @@ export default function SignInPage() {
       if (signInError) {
         setError(signInError);
       } else {
-        // For admin login, refresh the page to load the new session
+        // For admin login, go directly to admin panel
         if (username === 'admin') {
-          window.location.href = '/dashboard';
+          window.location.href = '/admin';
         } else {
           router.push('/dashboard');
         }
