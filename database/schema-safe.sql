@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS clinics (
 CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     username VARCHAR(50) NOT NULL UNIQUE,
+    display_name VARCHAR(255),
     email VARCHAR(255) NOT NULL UNIQUE,
     role VARCHAR(20) DEFAULT 'public' CHECK (role IN ('admin', 'clinic', 'public')),
     clinic_id UUID REFERENCES clinics(id) ON DELETE SET NULL,
@@ -349,9 +350,19 @@ CREATE TRIGGER update_appointments_updated_at
 -- Function to automatically create user profile on signup
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    user_username VARCHAR(50);
+    user_display_name VARCHAR(255);
 BEGIN
-    INSERT INTO public.user_profiles (id, username, email, role)
-    VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)), NEW.email, 'public');
+    -- Extract username from metadata or email
+    user_username := COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1));
+
+    -- Extract display name from metadata or use username
+    user_display_name := COALESCE(NEW.raw_user_meta_data->>'display_name', NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1));
+
+    INSERT INTO public.user_profiles (id, username, display_name, email, role)
+    VALUES (NEW.id, user_username, user_display_name, NEW.email, 'public');
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -452,8 +463,8 @@ BEGIN
         ) ON CONFLICT (email) DO NOTHING;
 
         -- Insert into user_profiles
-        INSERT INTO user_profiles (id, username, email, role)
-        VALUES (admin_id, 'admin', 'admin@mocards.com', 'admin')
+        INSERT INTO user_profiles (id, username, display_name, email, role)
+        VALUES (admin_id, 'admin', 'Administrator', 'admin@mocards.com', 'admin')
         ON CONFLICT (username) DO NOTHING;
 
         RAISE NOTICE 'Admin user created with username: admin, password: admin123';
@@ -464,11 +475,13 @@ EXCEPTION
     WHEN others THEN
         -- If auth.users insert fails (which it will in managed Supabase),
         -- just create the profile entry for manual user creation
-        INSERT INTO user_profiles (id, username, email, role)
-        SELECT id, 'admin', 'admin@mocards.com', 'admin'
+        INSERT INTO user_profiles (id, username, display_name, email, role)
+        SELECT id, 'admin', 'Administrator', 'admin@mocards.com', 'admin'
         FROM auth.users
         WHERE email = 'admin@mocards.com'
-        ON CONFLICT (username) DO UPDATE SET role = 'admin';
+        ON CONFLICT (username) DO UPDATE SET
+            role = 'admin',
+            display_name = 'Administrator';
 
         RAISE NOTICE 'Please create admin user manually in Supabase dashboard with email: admin@mocards.com';
 END $$;

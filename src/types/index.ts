@@ -78,6 +78,7 @@ export interface PerkRedemption {
 export interface UserProfile {
   id: string;
   username: string;
+  display_name?: string;
   email: string;
   role: 'admin' | 'clinic' | 'public';
   clinic_id?: string;

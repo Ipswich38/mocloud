@@ -43,14 +43,27 @@ If you've partially run setup before:
 
 ### 4. Create Admin User
 
-1. Sign up for an account through your application
+**Option A: Quick Setup (Recommended)**
+1. Go to Supabase Dashboard → Authentication → Users
+2. Click "Add User" and create:
+   - Email: `admin@mocards.com`
+   - Password: `admin123`
+   - Confirm email immediately
+3. Run the `admin-setup.sql` script to create the profile
+
+**Option B: Manual Profile Creation**
+1. Sign up through your application with any email
 2. Get your user ID from the Supabase auth dashboard
 3. Run this SQL to make yourself an admin:
    ```sql
    UPDATE user_profiles
-   SET role = 'admin'
+   SET role = 'admin', username = 'admin'
    WHERE id = 'your-user-id-here';
    ```
+
+**Login Credentials:**
+- Username: `admin`
+- Password: `admin123`
 
 ## 🔧 Troubleshooting
 
@@ -73,11 +86,17 @@ If you've partially run setup before:
 - Run table creation before RLS policies
 - Make sure all tables exist before creating policies
 
+**"display_name" constraint errors**
+- Run the `admin-setup.sql` script to fix column issues
+- This adds the display_name column if missing
+- Removes NOT NULL constraints that cause problems
+
 ### File Descriptions
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| **`schema-safe.sql`** | **🛡️ Error-free setup** | **Use this - handles existing objects!** |
+| **`schema-safe.sql`** | **🛡️ Complete error-free setup** | **Use this first - handles existing objects!** |
+| **`admin-setup.sql`** | **👤 Admin user profile setup** | **Run after schema if you get constraint errors** |
 | `schema.sql` | Complete unified setup | Fresh database only |
 | `supabase-setup.sql` | Tables and indexes only | Alternative: step-by-step approach |
 | `supabase-rls-policies.sql` | Security policies | Alternative: step-by-step approach |

@@ -58,7 +58,8 @@ export class AuthService {
         password,
         options: {
           data: {
-            username: username
+            username: username,
+            display_name: username
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`
         }
