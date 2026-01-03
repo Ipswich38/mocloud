@@ -78,13 +78,13 @@ export function useRequireAuth() {
 }
 
 export function useRequireAdmin() {
-  const { profile, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && profile?.role !== 'admin') {
+    if (!loading && (!user || profile?.role !== 'admin')) {
       window.location.href = '/auth/signin';
     }
-  }, [profile, loading]);
+  }, [user, profile, loading]);
 
   return { profile, loading };
 }
