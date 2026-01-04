@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Calendar, Clock, MapPin, User, Filter, Search } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Filter, Search, Plus, X } from 'lucide-react';
 
 interface Appointment {
   id: string;
@@ -32,6 +34,26 @@ export default function AppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [regionFilter, setRegionFilter] = useState('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Form state for creating appointment requests
+  const [newRequest, setNewRequest] = useState({
+    cardCode: '',
+    patientName: '',
+    clinicId: '',
+    requestedDate: '',
+    requestedTime: '',
+    purpose: '',
+    notes: ''
+  });
+
+  // Mock clinics data
+  const mockClinics = [
+    { id: 'clinic-1', name: 'SmileCare Dental Cavite', region: 'CVT' },
+    { id: 'clinic-2', name: 'Bright Dental Batangas', region: 'BTG' },
+    { id: 'clinic-3', name: 'Pearl White Laguna', region: 'LGN' },
+    { id: 'clinic-4', name: 'Healthy Smiles MIMAROPA', region: 'MIM' }
+  ];
 
   // Mock appointment data
   const mockAppointments: Appointment[] = [
@@ -134,6 +156,24 @@ export default function AppointmentsPage() {
     console.log(`Updating appointment ${appointmentId} to ${newStatus}`);
   };
 
+  const handleCreateRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would make an API call to create the appointment request
+    console.log('Creating appointment request:', newRequest);
+
+    // Reset form and close modal
+    setNewRequest({
+      cardCode: '',
+      patientName: '',
+      clinicId: '',
+      requestedDate: '',
+      requestedTime: '',
+      purpose: '',
+      notes: ''
+    });
+    setShowCreateModal(false);
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -146,47 +186,55 @@ export default function AppointmentsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Appointment Requests</h1>
-          <p className="mt-2 text-gray-600">Monitor and manage appointment requests from cardholders</p>
+      <div className="space-y-8">
+        {/* Apple-style header */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 mb-4 shadow-lg">
+            <Calendar className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-semibold tracking-tight text-gray-900 mb-3">Appointment Requests</h1>
+          <p className="text-lg text-gray-500 font-medium">Create appointment requests for patients and assign to clinics</p>
+        </div>
+
+        {/* Create New Request Button */}
+        <div className="text-center mb-8">
+          <Button
+            size="lg"
+            className="apple-button px-8 py-4 text-lg font-medium"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Calendar className="w-5 h-5 mr-2" />
+            Create New Appointment Request
+          </Button>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">{mockAppointments.length}</div>
-              <div className="text-sm text-gray-600">Total Requests</div>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="text-3xl font-semibold text-gray-900 mb-1">{mockAppointments.length}</div>
+            <div className="text-sm font-medium text-gray-500">Total Requests Sent</div>
+          </div>
 
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {mockAppointments.filter(a => a.status === 'pending').length}
-              </div>
-              <div className="text-sm text-gray-600">Pending</div>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="text-3xl font-semibold text-yellow-600 mb-1">
+              {mockAppointments.filter(a => a.status === 'pending').length}
+            </div>
+            <div className="text-sm font-medium text-gray-500">Awaiting Clinic Response</div>
+          </div>
 
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {mockAppointments.filter(a => a.status === 'confirmed').length}
-              </div>
-              <div className="text-sm text-gray-600">Confirmed</div>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="text-3xl font-semibold text-blue-600 mb-1">
+              {mockAppointments.filter(a => a.status === 'confirmed').length}
+            </div>
+            <div className="text-sm font-medium text-gray-500">Accepted by Clinics</div>
+          </div>
 
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {mockAppointments.filter(a => a.status === 'completed').length}
-              </div>
-              <div className="text-sm text-gray-600">Completed</div>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="text-3xl font-semibold text-green-600 mb-1">
+              {mockAppointments.filter(a => a.status === 'completed').length}
+            </div>
+            <div className="text-sm font-medium text-gray-500">Completed</div>
+          </div>
         </div>
 
         {/* Filters */}
@@ -300,7 +348,7 @@ export default function AppointmentsPage() {
                     )}
 
                     <div className="text-xs text-gray-500">
-                      Requested on {new Date(appointment.createdAt).toLocaleDateString('en-PH', {
+                      Request sent on {new Date(appointment.createdAt).toLocaleDateString('en-PH', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
@@ -310,25 +358,34 @@ export default function AppointmentsPage() {
                     </div>
                   </div>
 
-                  {appointment.status === 'pending' && (
-                    <div className="flex flex-col sm:flex-row gap-2 lg:flex-col">
-                      <Button
-                        size="sm"
-                        onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
-                        className="w-full sm:w-auto lg:w-full"
-                      >
-                        Confirm
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => updateAppointmentStatus(appointment.id, 'rejected')}
-                        className="w-full sm:w-auto lg:w-full"
-                      >
-                        Reject
-                      </Button>
+                  <div className="flex flex-col gap-2 min-w-[120px]">
+                    <div className="text-xs text-gray-500 text-center">
+                      Assigned to:
                     </div>
-                  )}
+                    <div className="text-sm font-medium text-gray-700 text-center">
+                      {appointment.clinic.name}
+                    </div>
+                    {appointment.status === 'pending' && (
+                      <div className="text-xs text-orange-600 text-center font-medium">
+                        Awaiting clinic response
+                      </div>
+                    )}
+                    {appointment.status === 'confirmed' && (
+                      <div className="text-xs text-blue-600 text-center font-medium">
+                        Accepted by clinic
+                      </div>
+                    )}
+                    {appointment.status === 'rejected' && (
+                      <div className="text-xs text-red-600 text-center font-medium">
+                        Declined by clinic
+                      </div>
+                    )}
+                    {appointment.status === 'completed' && (
+                      <div className="text-xs text-green-600 text-center font-medium">
+                        Treatment completed
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -344,6 +401,150 @@ export default function AppointmentsPage() {
             </Card>
           )}
         </div>
+
+        {/* Create Appointment Request Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="apple-card max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900">Create Appointment Request</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-full w-8 h-8 p-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <form onSubmit={handleCreateRequest} className="space-y-4">
+                <div>
+                  <Label htmlFor="cardCode" className="text-sm font-medium text-gray-700">
+                    Card Code
+                  </Label>
+                  <Input
+                    id="cardCode"
+                    value={newRequest.cardCode}
+                    onChange={(e) => setNewRequest({...newRequest, cardCode: e.target.value})}
+                    placeholder="e.g., CVT202401234"
+                    required
+                    className="apple-input mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="patientName" className="text-sm font-medium text-gray-700">
+                    Patient Name
+                  </Label>
+                  <Input
+                    id="patientName"
+                    value={newRequest.patientName}
+                    onChange={(e) => setNewRequest({...newRequest, patientName: e.target.value})}
+                    placeholder="Enter patient full name"
+                    required
+                    className="apple-input mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="clinic" className="text-sm font-medium text-gray-700">
+                    Assign to Clinic
+                  </Label>
+                  <Select
+                    value={newRequest.clinicId}
+                    onValueChange={(value) => setNewRequest({...newRequest, clinicId: value})}
+                  >
+                    <SelectTrigger className="apple-input mt-1">
+                      <SelectValue placeholder="Select clinic to assign request" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockClinics.map((clinic) => (
+                        <SelectItem key={clinic.id} value={clinic.id}>
+                          {clinic.name} ({clinic.region})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="requestedDate" className="text-sm font-medium text-gray-700">
+                      Requested Date
+                    </Label>
+                    <Input
+                      id="requestedDate"
+                      type="date"
+                      value={newRequest.requestedDate}
+                      onChange={(e) => setNewRequest({...newRequest, requestedDate: e.target.value})}
+                      required
+                      className="apple-input mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="requestedTime" className="text-sm font-medium text-gray-700">
+                      Requested Time
+                    </Label>
+                    <Input
+                      id="requestedTime"
+                      type="time"
+                      value={newRequest.requestedTime}
+                      onChange={(e) => setNewRequest({...newRequest, requestedTime: e.target.value})}
+                      required
+                      className="apple-input mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="purpose" className="text-sm font-medium text-gray-700">
+                    Purpose of Visit
+                  </Label>
+                  <Textarea
+                    id="purpose"
+                    value={newRequest.purpose}
+                    onChange={(e) => setNewRequest({...newRequest, purpose: e.target.value})}
+                    placeholder="Describe the treatment or service needed"
+                    required
+                    className="apple-input mt-1 min-h-[80px]"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
+                    Additional Notes (Optional)
+                  </Label>
+                  <Textarea
+                    id="notes"
+                    value={newRequest.notes}
+                    onChange={(e) => setNewRequest({...newRequest, notes: e.target.value})}
+                    placeholder="Any special instructions or patient information"
+                    className="apple-input mt-1 min-h-[60px]"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="apple-button flex-1 py-3"
+                  >
+                    Send Request to Clinic
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

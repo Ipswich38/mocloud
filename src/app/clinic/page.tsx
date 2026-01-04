@@ -163,28 +163,26 @@ export default function ClinicDashboard() {
             </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-green-600" />
-                Appointment Requests
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Review and manage patient appointment requests from cardholders.
-              </p>
-              <div className="space-y-2">
-                <Button asChild className="w-full" variant="outline">
-                  <a href="/clinic/appointments">View All Requests</a>
-                </Button>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Pending</span>
-                  <Badge variant="secondary">{stats.pendingAppointments}</Badge>
-                </div>
+          <div className="apple-card group">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4">
+                <Calendar className="w-6 h-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Appointment Requests</h3>
+            <p className="text-gray-600 text-base mb-6">
+              Review and manage appointment requests sent by admin for your clinic.
+            </p>
+            <div className="space-y-3">
+              <a href="/clinic/appointments" className="apple-button block text-center py-3">
+                View All Requests
+              </a>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Pending Response</span>
+                <Badge variant="secondary">{stats.pendingAppointments}</Badge>
+              </div>
+            </div>
+          </div>
 
           <Card>
             <CardHeader>
