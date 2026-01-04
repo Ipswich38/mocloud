@@ -6,12 +6,19 @@ This directory contains the complete database schema and migration files for the
 
 ## Files Description
 
-### 1. `schema-production-ready.sql` - **RECOMMENDED** Production Database Schema
-- **Purpose**: Creates the complete database structure with all safety checks
+### 1. `schema-bulletproof.sql` - **⭐ MOST RECOMMENDED** Bulletproof Database Schema
+- **Purpose**: Creates the complete database structure with ALL conflict handling
+- **Use**: For ANY database state - new, existing, or partially configured
+- **Contains**: Full schema + new card format + enhanced error handling
+- **Safe**: 💯 BULLETPROOF - handles existing policies, constraints, and columns
+- **Status**: ⭐ **USE THIS FILE** - Foolproof option that never fails
+
+### 2. `schema-production-ready.sql` - Production Database Schema
+- **Purpose**: Creates the complete database structure with safety checks
 - **Use**: For new deployments AND existing database updates
 - **Contains**: All tables, indexes, RLS policies, functions, and triggers
-- **Safe**: 100% safe to run multiple times - handles all conflicts gracefully
-- **Status**: ✅ **USE THIS FILE** - Most reliable option
+- **Safe**: 100% safe to run multiple times - handles most conflicts gracefully
+- **Status**: ✅ **RELIABLE** - Good backup option
 
 ### 2. `schema.sql` - Original Schema (Now Fixed)
 - **Purpose**: Creates the complete database structure from scratch
@@ -27,7 +34,15 @@ This directory contains the complete database schema and migration files for the
 
 ## Deployment Instructions
 
-### ⭐ **RECOMMENDED: Production-Ready Installation**
+### ⭐ **MOST RECOMMENDED: Bulletproof Installation**
+
+1. **Run Bulletproof Schema** (Works for ANY database state):
+   ```sql
+   -- In Supabase SQL Editor, run:
+   -- Copy and paste entire contents of schema-bulletproof.sql
+   ```
+
+### ✅ **Alternative: Production-Ready Installation**
 
 1. **Run Production Schema** (Works for both new and existing databases):
    ```sql

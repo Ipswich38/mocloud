@@ -25,13 +25,13 @@ export default function GenerateCardsPage() {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [recentBatches, setRecentBatches] = useState<GenerationResult[]>([]);
 
-  // Mock clinic data - in production, fetch from Supabase
+  // Mock clinic data with new format - in production, fetch from Supabase
   useEffect(() => {
     const mockClinics: Clinic[] = [
       {
         id: 'clinic-1',
         name: 'SmileCare Dental Cavite',
-        region: 'Cavite',
+        region: 'CVT',
         address: 'Dasmarinas, Cavite',
         contact_email: 'info@smilecare-cavite.com',
         contact_phone: '+639171234567'
@@ -39,7 +39,7 @@ export default function GenerateCardsPage() {
       {
         id: 'clinic-2',
         name: 'Bright Dental Batangas',
-        region: 'Batangas',
+        region: 'BTG',
         address: 'Lipa City, Batangas',
         contact_email: 'contact@bright-batangas.com',
         contact_phone: '+639181234567'
@@ -47,26 +47,34 @@ export default function GenerateCardsPage() {
       {
         id: 'clinic-3',
         name: 'Pearl White Dental Laguna',
-        region: 'Laguna',
+        region: 'LGN',
         address: 'Santa Rosa, Laguna',
         contact_email: 'hello@pearlwhite-laguna.com',
         contact_phone: '+639191234567'
       },
       {
         id: 'clinic-4',
-        name: 'Healthy Smiles MIMAROPA',
-        region: 'MIMAROPA',
-        address: 'Calapan, Oriental Mindoro',
-        contact_email: 'info@healthysmiles-mimaropa.com',
+        name: 'Quezon Dental Center',
+        region: 'QZN',
+        address: 'Lucena City, Quezon',
+        contact_email: 'info@quezon-dental.com',
         contact_phone: '+639201234567'
       },
       {
         id: 'clinic-5',
-        name: 'Premium Dental Care Cavite',
-        region: 'Cavite',
-        address: 'Bacoor, Cavite',
-        contact_email: 'premium@dental-cavite.com',
+        name: 'Rizal Oral Care',
+        region: 'RIZ',
+        address: 'Antipolo, Rizal',
+        contact_email: 'care@rizal-oral.com',
         contact_phone: '+639211234567'
+      },
+      {
+        id: 'clinic-6',
+        name: 'Healthy Smiles MIMAROPA',
+        region: 'MIM',
+        address: 'Calapan, Oriental Mindoro',
+        contact_email: 'info@healthysmiles-mimaropa.com',
+        contact_phone: '+639221234567'
       }
     ];
 
@@ -100,7 +108,7 @@ export default function GenerateCardsPage() {
               <h1 className="text-3xl font-bold text-gray-900">MOC Card Generation</h1>
             </div>
             <p className="mt-2 text-gray-600">
-              Generate up to 10,000 dental benefit cards with customizable control numbers
+              Generate dental benefit cards with format MOC-NNNNN-RRR-CCCCCC (up to 10,000 per clinic)
             </p>
           </div>
           <div className="flex gap-2">

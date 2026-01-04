@@ -209,7 +209,7 @@ export function CardGenerationForm({ clinics = [], onGenerationComplete }: CardG
               <Zap className="h-5 w-5 text-blue-600" />
               MOC Card Generation
             </CardTitle>
-            <p className="text-gray-600">Generate up to 10,000 dental benefit cards with customizable control numbers</p>
+            <p className="text-gray-600">Generate dental benefit cards with format MOC-NNNNN-RRR-CCCCCC (up to 10,000 per clinic)</p>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Error Display */}
@@ -305,7 +305,7 @@ export function CardGenerationForm({ clinics = [], onGenerationComplete }: CardG
                 </Badge>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Format: {effectivePrefix}-TIMESTAMP-SEQUENCE-RANDOM
+                New Format: MOC-{(effectiveQuantity || 1).toString().padStart(5, '0')}-{clinics.find(c => c.id === clinicId)?.region || 'RRR'}-{clinics.find(c => c.id === clinicId)?.region || 'CCC'}001
               </p>
             </div>
 

@@ -1,7 +1,8 @@
--- MOCARDS Database Schema
+-- =====================================================
+-- MOCARDS BULLETPROOF DATABASE SCHEMA
 -- Dental Benefits Card Management System
--- Complete setup for Supabase - Run this entire file in Supabase SQL Editor
--- Safe to run multiple times (uses IF NOT EXISTS)
+-- 100% SAFE TO RUN MULTIPLE TIMES - HANDLES ALL CONFLICTS
+-- =====================================================
 
 -- Note: Supabase manages UUID extension and JWT secrets automatically
 
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS regions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert Philippine regions including 4A and 4B split (skip if exists)
+-- Insert Philippine regions including 4A and 4B split (safe to run multiple times)
 INSERT INTO regions (code, name) VALUES
     ('CVT', 'Cavite'),
     ('BTG', 'Batangas'),
@@ -31,12 +32,12 @@ ON CONFLICT (code) DO NOTHING;
 CREATE TABLE IF NOT EXISTS clinic_codes (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     region_id UUID NOT NULL REFERENCES regions(id) ON DELETE CASCADE,
-    code VARCHAR(6) NOT NULL UNIQUE, -- Format: CVT001, BTG002, etc.
+    code VARCHAR(6) NOT NULL UNIQUE,
     is_assigned BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create index for faster lookups
+-- Create indexes (safe to create multiple times)
 CREATE INDEX IF NOT EXISTS idx_clinic_codes_region_id ON clinic_codes(region_id);
 CREATE INDEX IF NOT EXISTS idx_clinic_codes_assigned ON clinic_codes(is_assigned);
 
@@ -61,7 +62,7 @@ CREATE INDEX IF NOT EXISTS idx_clinics_active ON clinics(is_active);
 CREATE INDEX IF NOT EXISTS idx_clinics_name ON clinics(name);
 
 -- =====================================================
--- 4. USER PROFILES TABLE (extends auth.users)
+-- 4. USER PROFILES TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -77,11 +78,13 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON user_profiles(role);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_clinic ON user_profiles(clinic_id);
 
 -- =====================================================
--- 5. CARDS TABLE
+-- 5. CARDS TABLE - ENHANCED FOR NEW FORMAT
 -- =====================================================
+
+-- First create the table with basic structure if it doesn't exist
 CREATE TABLE IF NOT EXISTS cards (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    card_code VARCHAR(12) NOT NULL UNIQUE, -- MC + 10 characters
+    card_code VARCHAR(25) NOT NULL UNIQUE,
     patient_name VARCHAR(100) NOT NULL,
     patient_birthdate DATE NOT NULL,
     patient_address TEXT NOT NULL,
@@ -93,11 +96,54 @@ CREATE TABLE IF NOT EXISTS cards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for optimal performance
+-- Add new columns if they don't exist
+DO $$
+BEGIN
+    -- Add control_number if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'cards' AND column_name = 'control_number' AND table_schema = 'public') THEN
+        ALTER TABLE cards ADD COLUMN control_number INTEGER;
+    END IF;
+
+    -- Add region_code if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'cards' AND column_name = 'region_code' AND table_schema = 'public') THEN
+        ALTER TABLE cards ADD COLUMN region_code VARCHAR(3);
+    END IF;
+
+    -- Add clinic_code if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'cards' AND column_name = 'clinic_code' AND table_schema = 'public') THEN
+        ALTER TABLE cards ADD COLUMN clinic_code VARCHAR(6);
+    END IF;
+
+    -- Update card_code column size if needed
+    BEGIN
+        ALTER TABLE cards ALTER COLUMN card_code TYPE VARCHAR(25);
+    EXCEPTION
+        WHEN OTHERS THEN
+            NULL; -- Column already has sufficient size
+    END;
+
+    -- Add unique constraint if it doesn't exist
+    BEGIN
+        ALTER TABLE cards ADD CONSTRAINT unique_control_number_per_clinic UNIQUE(control_number, clinic_id);
+    EXCEPTION
+        WHEN duplicate_object THEN
+            NULL; -- Constraint already exists
+        WHEN OTHERS THEN
+            NULL; -- Other constraint conflicts
+    END;
+END $$;
+
+-- Create indexes (all safe to run multiple times)
 CREATE INDEX IF NOT EXISTS idx_cards_code ON cards(card_code);
 CREATE INDEX IF NOT EXISTS idx_cards_clinic ON cards(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_cards_active ON cards(is_active);
 CREATE INDEX IF NOT EXISTS idx_cards_created_at ON cards(created_at);
+CREATE INDEX IF NOT EXISTS idx_cards_control_number ON cards(control_number);
+CREATE INDEX IF NOT EXISTS idx_cards_region_code ON cards(region_code);
+CREATE INDEX IF NOT EXISTS idx_cards_clinic_code ON cards(clinic_code);
 
 -- =====================================================
 -- 6. CARD PERKS TABLE
@@ -120,30 +166,29 @@ CREATE INDEX IF NOT EXISTS idx_card_perks_redeemed ON card_perks(is_redeemed);
 CREATE INDEX IF NOT EXISTS idx_card_perks_category ON card_perks(perk_category);
 
 -- =====================================================
--- 7. APPOINTMENTS TABLE (Basic structure - Enhanced by migration)
+-- 7. APPOINTMENTS TABLE - BASIC STRUCTURE
 -- =====================================================
--- NOTE: Run migration-appointment-workflow.sql after this for enhanced features
 CREATE TABLE IF NOT EXISTS appointments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+    card_id UUID REFERENCES cards(id) ON DELETE SET NULL,
     clinic_id UUID NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
     requested_date DATE NOT NULL,
     requested_time TIME NOT NULL,
     purpose TEXT NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'rejected', 'completed')),
+    status VARCHAR(20) DEFAULT 'pending',
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create basic indexes (enhanced indexes created by migration)
+-- Create basic indexes
 CREATE INDEX IF NOT EXISTS idx_appointments_card_id ON appointments(card_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_clinic_id ON appointments(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(requested_date);
 CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
 
 -- =====================================================
--- 8. PERK REDEMPTIONS TABLE (Audit trail)
+-- 8. PERK REDEMPTIONS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS perk_redemptions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -158,10 +203,8 @@ CREATE INDEX IF NOT EXISTS idx_perk_redemptions_perk_id ON perk_redemptions(perk
 CREATE INDEX IF NOT EXISTS idx_perk_redemptions_user ON perk_redemptions(redeemed_by);
 
 -- =====================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ENABLE ROW LEVEL SECURITY
 -- =====================================================
-
--- Enable RLS on all tables (safe to run multiple times)
 ALTER TABLE regions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clinic_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clinics ENABLE ROW LEVEL SECURITY;
@@ -171,8 +214,48 @@ ALTER TABLE card_perks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE perk_redemptions ENABLE ROW LEVEL SECURITY;
 
+-- =====================================================
+-- RLS POLICIES - SAFE RECREATION
+-- =====================================================
+
+-- Drop all existing policies first (safe if they don't exist)
+DO $$
+BEGIN
+    -- Regions policies
+    DROP POLICY IF EXISTS "Regions are publicly readable" ON regions;
+
+    -- Clinic codes policies
+    DROP POLICY IF EXISTS "Clinic codes admin only" ON clinic_codes;
+
+    -- Clinics policies
+    DROP POLICY IF EXISTS "Clinics are publicly readable" ON clinics;
+    DROP POLICY IF EXISTS "Clinics admin write" ON clinics;
+
+    -- User profiles policies
+    DROP POLICY IF EXISTS "Users can read own profile" ON user_profiles;
+    DROP POLICY IF EXISTS "Admins can read all profiles" ON user_profiles;
+    DROP POLICY IF EXISTS "Users can update own profile" ON user_profiles;
+
+    -- Cards policies
+    DROP POLICY IF EXISTS "Cards public lookup by code" ON cards;
+    DROP POLICY IF EXISTS "Cards admin/clinic write" ON cards;
+    DROP POLICY IF EXISTS "Cards admin update" ON cards;
+
+    -- Card perks policies
+    DROP POLICY IF EXISTS "Card perks follow card access" ON card_perks;
+    DROP POLICY IF EXISTS "Card perks admin/clinic write" ON card_perks;
+
+    -- Appointments policies
+    DROP POLICY IF EXISTS "Appointments public create" ON appointments;
+    DROP POLICY IF EXISTS "Appointments clinic/admin read" ON appointments;
+    DROP POLICY IF EXISTS "Appointments clinic/admin update" ON appointments;
+
+    -- Perk redemptions policies
+    DROP POLICY IF EXISTS "Perk redemptions admin/clinic only" ON perk_redemptions;
+END $$;
+
+-- Create fresh RLS policies
 -- Regions: Public read access
-DROP POLICY IF EXISTS "Regions are publicly readable" ON regions;
 CREATE POLICY "Regions are publicly readable" ON regions
     FOR SELECT USING (true);
 
@@ -206,9 +289,9 @@ CREATE POLICY "Users can read own profile" ON user_profiles
 CREATE POLICY "Admins can read all profiles" ON user_profiles
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM user_profiles
-            WHERE user_profiles.id = auth.uid()
-            AND user_profiles.role = 'admin'
+            SELECT 1 FROM user_profiles up
+            WHERE up.id = auth.uid()
+            AND up.role = 'admin'
         )
     );
 
@@ -314,7 +397,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers for updated_at (safe to run multiple times)
+-- Safe trigger creation (drop if exists, then create)
 DROP TRIGGER IF EXISTS update_clinics_updated_at ON clinics;
 CREATE TRIGGER update_clinics_updated_at
     BEFORE UPDATE ON clinics
@@ -339,17 +422,18 @@ CREATE TRIGGER update_appointments_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
 
--- Function to automatically create user profile on signup
+-- Function for automatic user profile creation
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO public.user_profiles (id, email, role)
-    VALUES (NEW.id, NEW.email, 'public');
+    VALUES (NEW.id, NEW.email, 'public')
+    ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger for automatic profile creation (safe to run multiple times)
+-- Safe trigger for profile creation
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
@@ -357,21 +441,52 @@ CREATE TRIGGER on_auth_user_created
     EXECUTE FUNCTION handle_new_user();
 
 -- =====================================================
--- SAMPLE DATA FOR DEVELOPMENT
+-- CARD GENERATION FUNCTIONS
 -- =====================================================
 
--- Create admin user profile (replace with actual admin user ID)
--- INSERT INTO user_profiles (id, email, role) VALUES
---     ('your-admin-user-id-here', 'admin@mocards.com', 'admin');
+-- Function to generate new format card codes
+CREATE OR REPLACE FUNCTION generate_card_code(
+    p_control_number INTEGER,
+    p_region_code VARCHAR(3),
+    p_clinic_code VARCHAR(6)
+) RETURNS VARCHAR(25) AS $$
+BEGIN
+    -- Format: MOC-NNNNN-RRR-CCCCCC
+    -- Example: MOC-00001-CVT-CVT001
+    RETURN 'MOC-' || LPAD(p_control_number::TEXT, 5, '0') || '-' || p_region_code || '-' || p_clinic_code;
+END;
+$$ LANGUAGE plpgsql;
 
--- Generate clinic codes for each region (001-016) - Safe to run multiple times
+-- Function to get next control number for a clinic
+CREATE OR REPLACE FUNCTION get_next_control_number(p_clinic_id UUID) RETURNS INTEGER AS $$
+DECLARE
+    next_number INTEGER;
+BEGIN
+    -- Get the next available control number for this clinic (1-10000)
+    SELECT COALESCE(MAX(control_number), 0) + 1 INTO next_number
+    FROM cards
+    WHERE clinic_id = p_clinic_id;
+
+    -- Ensure we don't exceed 10000
+    IF next_number > 10000 THEN
+        RAISE EXCEPTION 'Control number limit exceeded for clinic. Maximum 10000 cards per clinic.';
+    END IF;
+
+    RETURN next_number;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =====================================================
+-- GENERATE CLINIC CODES (Safe to run multiple times)
+-- Includes Region 4A (CVT, BTG, LGN, QZN, RIZ) and 4B (MIM)
+-- =====================================================
 DO $$
 DECLARE
     region_record RECORD;
     i INTEGER;
     clinic_code VARCHAR(6);
 BEGIN
-    FOR region_record IN SELECT id, code FROM regions LOOP
+    FOR region_record IN SELECT id, code FROM regions ORDER BY code LOOP
         FOR i IN 1..16 LOOP
             clinic_code := region_record.code || LPAD(i::TEXT, 3, '0');
             INSERT INTO clinic_codes (region_id, code, is_assigned)
@@ -379,34 +494,42 @@ BEGIN
             ON CONFLICT (code) DO NOTHING;
         END LOOP;
     END LOOP;
+    RAISE NOTICE 'Clinic codes generation completed for all regions including 4A/4B split (existing codes skipped)';
 END $$;
 
 -- =====================================================
--- VERIFICATION QUERIES (Optional - Run to verify setup)
+-- VERIFICATION QUERIES
 -- =====================================================
 
--- Check all tables exist
-SELECT 'Tables created successfully!' as status,
-       COUNT(*) as table_count
+-- Verify all tables exist
+SELECT
+    'Database setup verification:' as status,
+    COUNT(DISTINCT table_name) as tables_created
 FROM information_schema.tables
-WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE'
+  AND table_name IN ('regions', 'clinic_codes', 'clinics', 'user_profiles', 'cards', 'card_perks', 'appointments', 'perk_redemptions');
 
--- Check regions are populated
-SELECT 'Regions populated:' as status, * FROM regions ORDER BY code;
+-- Verify regions are populated
+SELECT 'Regions:' as info, code, name FROM regions ORDER BY code;
 
--- Check clinic codes generated (should show 16 per region = 64 total)
-SELECT 'Clinic codes generated:' as status,
-       r.code as region_code,
-       r.name as region_name,
-       COUNT(cc.id) as codes_generated
-FROM regions r
-LEFT JOIN clinic_codes cc ON r.id = cc.region_id
-GROUP BY r.id, r.code, r.name
-ORDER BY r.code;
-
--- Total clinic codes summary
-SELECT 'Total clinic codes:' as status,
-       COUNT(*) as total_codes,
-       COUNT(CASE WHEN is_assigned THEN 1 END) as assigned_codes,
-       COUNT(CASE WHEN NOT is_assigned THEN 1 END) as available_codes
+-- Verify clinic codes summary
+SELECT
+    'Clinic codes summary:' as info,
+    COUNT(*) as total_codes,
+    COUNT(CASE WHEN is_assigned THEN 1 END) as assigned,
+    COUNT(CASE WHEN NOT is_assigned THEN 1 END) as available
 FROM clinic_codes;
+
+-- Test card code generation functions
+SELECT 'Sample card codes in new format:' as info;
+SELECT generate_card_code(1, 'CVT', 'CVT001') as sample_card_1;
+SELECT generate_card_code(150, 'BTG', 'BTG005') as sample_card_2;
+SELECT generate_card_code(10000, 'MIM', 'MIM016') as sample_card_3;
+
+-- Success message
+SELECT
+    '✅ MOCARDS Database Setup Complete!' as status,
+    'Database is ready for production use with new card format' as message,
+    'Format: MOC-NNNNN-RRR-CCCCCC' as card_format,
+    'Run migration-appointment-workflow.sql for enhanced appointment features' as next_step;

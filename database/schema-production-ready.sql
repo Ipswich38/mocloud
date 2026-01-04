@@ -16,11 +16,13 @@ CREATE TABLE IF NOT EXISTS regions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert Philippine regions (safe to run multiple times)
+-- Insert Philippine regions including 4A and 4B split (safe to run multiple times)
 INSERT INTO regions (code, name) VALUES
     ('CVT', 'Cavite'),
     ('BTG', 'Batangas'),
     ('LGN', 'Laguna'),
+    ('QZN', 'Quezon'),
+    ('RIZ', 'Rizal'),
     ('MIM', 'MIMAROPA Region (Region IV-B)')
 ON CONFLICT (code) DO NOTHING;
 
@@ -80,7 +82,10 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_clinic ON user_profiles(clinic_id);
 -- =====================================================
 CREATE TABLE IF NOT EXISTS cards (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    card_code VARCHAR(12) NOT NULL UNIQUE,
+    card_code VARCHAR(25) NOT NULL UNIQUE, -- Updated for MOC-NNNNN-RRR-CCCCCC format (23 chars + buffer)
+    control_number INTEGER NOT NULL, -- Sequential number 1-10000
+    region_code VARCHAR(3) NOT NULL, -- CVT, BTG, LGN, QZN, RIZ, MIM
+    clinic_code VARCHAR(6) NOT NULL, -- CVT001, BTG002, etc.
     patient_name VARCHAR(100) NOT NULL,
     patient_birthdate DATE NOT NULL,
     patient_address TEXT NOT NULL,
@@ -89,7 +94,10 @@ CREATE TABLE IF NOT EXISTS cards (
     is_active BOOLEAN DEFAULT TRUE,
     generated_by UUID NOT NULL REFERENCES auth.users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    -- Ensure unique control numbers per clinic
+    UNIQUE(control_number, clinic_id)
 );
 
 -- Create indexes
@@ -97,6 +105,9 @@ CREATE INDEX IF NOT EXISTS idx_cards_code ON cards(card_code);
 CREATE INDEX IF NOT EXISTS idx_cards_clinic ON cards(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_cards_active ON cards(is_active);
 CREATE INDEX IF NOT EXISTS idx_cards_created_at ON cards(created_at);
+CREATE INDEX IF NOT EXISTS idx_cards_control_number ON cards(control_number);
+CREATE INDEX IF NOT EXISTS idx_cards_region_code ON cards(region_code);
+CREATE INDEX IF NOT EXISTS idx_cards_clinic_code ON cards(clinic_code);
 
 -- =====================================================
 -- 6. CARD PERKS TABLE
@@ -378,6 +389,7 @@ CREATE TRIGGER on_auth_user_created
 
 -- =====================================================
 -- GENERATE CLINIC CODES (Safe to run multiple times)
+-- Includes Region 4A (CVT, BTG, LGN, QZN, RIZ) and 4B (MIM)
 -- =====================================================
 DO $$
 DECLARE
@@ -385,7 +397,7 @@ DECLARE
     i INTEGER;
     clinic_code VARCHAR(6);
 BEGIN
-    FOR region_record IN SELECT id, code FROM regions LOOP
+    FOR region_record IN SELECT id, code FROM regions ORDER BY code LOOP
         FOR i IN 1..16 LOOP
             clinic_code := region_record.code || LPAD(i::TEXT, 3, '0');
             INSERT INTO clinic_codes (region_id, code, is_assigned)
@@ -393,7 +405,7 @@ BEGIN
             ON CONFLICT (code) DO NOTHING;
         END LOOP;
     END LOOP;
-    RAISE NOTICE 'Clinic codes generation completed (existing codes skipped)';
+    RAISE NOTICE 'Clinic codes generation completed for all regions including 4A/4B split (existing codes skipped)';
 END $$;
 
 -- =====================================================
