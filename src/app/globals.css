@@ -47,25 +47,44 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Apple-inspired design system */
+  --radius: 0.875rem; /* Increased radius for Apple's rounded aesthetic */
+
+  /* Core color palette inspired by Apple's system colors */
+  --background: oklch(0.99 0 0); /* Pure white with subtle warmth */
+  --foreground: oklch(0.12 0 0); /* Deep charcoal for text */
+
+  /* Card system with Apple's glass morphism */
+  --card: oklch(0.99 0 0 / 0.8); /* Translucent white */
+  --card-foreground: oklch(0.12 0 0);
+
+  /* Popovers with glass effect */
+  --popover: oklch(0.99 0 0 / 0.95);
+  --popover-foreground: oklch(0.12 0 0);
+
+  /* Apple blue as primary */
+  --primary: oklch(0.52 0.15 241.5); /* Apple blue */
+  --primary-foreground: oklch(1 0 0);
+
+  /* Subtle secondary using Apple's gray scale */
+  --secondary: oklch(0.96 0.005 240); /* Cool gray */
+  --secondary-foreground: oklch(0.12 0 0);
+
+  /* Muted colors for supporting elements */
+  --muted: oklch(0.96 0.005 240);
+  --muted-foreground: oklch(0.55 0.01 240);
+
+  /* Accent using Apple's subtle approach */
+  --accent: oklch(0.96 0.005 240);
+  --accent-foreground: oklch(0.12 0 0);
+
+  /* Apple's red for destructive actions */
+  --destructive: oklch(0.55 0.22 25.2); /* Apple red */
+
+  /* Borders with Apple's subtle approach */
+  --border: oklch(0.9 0.005 240 / 0.4); /* Subtle translucent borders */
+  --input: oklch(0.96 0.005 240 / 0.6);
+  --ring: oklch(0.52 0.15 241.5 / 0.3); /* Apple blue with transparency */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -119,7 +138,122 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv01", "cv03", "cv04", "cv11";
+    /* Apple's background gradient */
+    background: linear-gradient(135deg,
+      oklch(0.99 0 0) 0%,
+      oklch(0.97 0.01 240) 100%);
+    background-attachment: fixed;
+    letter-spacing: -0.015em; /* Apple's tight letter spacing */
+  }
+
+  /* Apple typography scale */
+  h1 {
+    @apply text-3xl font-semibold tracking-tight;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+
+  h2 {
+    @apply text-2xl font-medium tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    @apply text-xl font-medium tracking-tight;
+    letter-spacing: -0.015em;
+  }
+
+  /* Apple's glass morphism for cards */
+  .apple-glass {
+    background: oklch(1 0 0 / 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid oklch(1 0 0 / 0.18);
+    box-shadow:
+      0 8px 32px oklch(0 0 0 / 0.05),
+      0 1px 2px oklch(0 0 0 / 0.1);
+  }
+
+  /* Apple button styling */
+  .apple-button {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium;
+    border-radius: 0.875rem;
+    background: oklch(0.52 0.15 241.5);
+    color: white;
+    border: none;
+    box-shadow:
+      0 1px 3px oklch(0 0 0 / 0.1),
+      0 1px 2px oklch(0 0 0 / 0.06),
+      inset 0 1px 0 oklch(1 0 0 / 0.1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.01em;
+  }
+
+  .apple-button:hover {
+    background: oklch(0.48 0.15 241.5);
+    box-shadow:
+      0 4px 12px oklch(0 0 0 / 0.15),
+      0 2px 4px oklch(0 0 0 / 0.08),
+      inset 0 1px 0 oklch(1 0 0 / 0.1);
+    transform: translateY(-1px);
+  }
+
+  .apple-button:active {
+    transform: translateY(0);
+    box-shadow:
+      0 2px 8px oklch(0 0 0 / 0.12),
+      0 1px 2px oklch(0 0 0 / 0.06),
+      inset 0 1px 0 oklch(1 0 0 / 0.1);
+  }
+
+  /* Apple input styling */
+  .apple-input {
+    @apply w-full px-4 py-3 text-base;
+    background: oklch(0.98 0.005 240 / 0.8);
+    border: 1px solid oklch(0.9 0.005 240 / 0.4);
+    border-radius: 0.875rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.01em;
+  }
+
+  .apple-input:focus {
+    outline: none;
+    background: oklch(1 0 0 / 0.9);
+    border-color: oklch(0.52 0.15 241.5 / 0.5);
+    box-shadow:
+      0 0 0 3px oklch(0.52 0.15 241.5 / 0.1),
+      0 2px 8px oklch(0 0 0 / 0.08);
+  }
+
+  /* Apple card styling */
+  .apple-card {
+    @apply p-6 rounded-2xl;
+    background: oklch(1 0 0 / 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid oklch(1 0 0 / 0.18);
+    box-shadow:
+      0 8px 32px oklch(0 0 0 / 0.04),
+      0 1px 2px oklch(0 0 0 / 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .apple-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 20px 40px oklch(0 0 0 / 0.08),
+      0 4px 8px oklch(0 0 0 / 0.06);
+  }
+
+  /* Apple navigation styling */
+  .apple-nav {
+    @apply fixed top-0 left-0 right-0 z-50;
+    background: oklch(1 0 0 / 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid oklch(0.9 0.005 240 / 0.3);
+    height: 72px;
   }
 }

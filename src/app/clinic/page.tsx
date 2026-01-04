@@ -71,100 +71,97 @@ export default function ClinicDashboard() {
 
   return (
     <ClinicLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Clinic Dashboard</h1>
-          <p className="mt-2 text-gray-600">
-            Welcome back, {profile?.clinic_name || profile?.display_name}! Here's your overview for today.
+      <div className="space-y-8">
+        {/* Apple-style welcome header */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 mb-4 shadow-lg">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-semibold tracking-tight text-gray-900 mb-3">Clinic Dashboard</h1>
+          <p className="text-lg text-gray-500 font-medium">
+            Welcome back, {profile?.clinic_name || profile?.display_name}
           </p>
+          <p className="text-base text-gray-400 mt-1">Here's your overview for today</p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total Cards</CardTitle>
-              <CreditCard className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-700">
-                {stats.totalCards}
-              </div>
-              <p className="text-xs text-blue-600 mt-1">
-                {stats.activeCards} active
-              </p>
-            </CardContent>
-          </Card>
+        {/* Apple-style metrics cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="apple-card text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 mb-3 mx-auto">
+              <CreditCard className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-3xl font-semibold text-blue-600 mb-1">
+              {stats.totalCards}
+            </div>
+            <div className="text-sm font-medium text-gray-500 mb-1">Total Cards</div>
+            <div className="text-xs text-gray-400">
+              {stats.activeCards} active
+            </div>
+          </div>
 
-          <Card className="border-green-200 bg-green-50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-700">Today's Appointments</CardTitle>
-              <Calendar className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-700">
-                {stats.todayAppointments}
-              </div>
-              <p className="text-xs text-green-600 mt-1">
-                {stats.pendingAppointments} pending approval
-              </p>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 mb-3 mx-auto">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-3xl font-semibold text-green-600 mb-1">
+              {stats.todayAppointments}
+            </div>
+            <div className="text-sm font-medium text-gray-500 mb-1">Today's Appointments</div>
+            <div className="text-xs text-gray-400">
+              {stats.pendingAppointments} pending approval
+            </div>
+          </div>
 
-          <Card className="border-orange-200 bg-orange-50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-orange-700">Pending Requests</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-700">
-                {stats.pendingAppointments}
-              </div>
-              <p className="text-xs text-orange-600 mt-1">
-                Requires action
-              </p>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 mb-3 mx-auto">
+              <Clock className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-3xl font-semibold text-orange-500 mb-1">
+              {stats.pendingAppointments}
+            </div>
+            <div className="text-sm font-medium text-gray-500 mb-1">Pending Requests</div>
+            <div className="text-xs text-gray-400">
+              Requires action
+            </div>
+          </div>
 
-          <Card className="border-purple-200 bg-purple-50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700">Perks Redeemed</CardTitle>
-              <CheckCircle className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-700">
-                {stats.perksRedeemed}
-              </div>
-              <p className="text-xs text-purple-600 mt-1">
-                This month
-              </p>
-            </CardContent>
-          </Card>
+          <div className="apple-card text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 mb-3 mx-auto">
+              <CheckCircle className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-3xl font-semibold text-purple-600 mb-1">
+              {stats.perksRedeemed}
+            </div>
+            <div className="text-sm font-medium text-gray-500 mb-1">Perks Redeemed</div>
+            <div className="text-xs text-gray-400">
+              This month
+            </div>
+          </div>
         </div>
 
-        {/* Main Action Cards */}
+        {/* Apple-style action cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-blue-600" />
-                Card Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Manage patient dental cards, view card details, and generate new cards.
-              </p>
-              <div className="space-y-2">
-                <Button asChild className="w-full" variant="outline">
-                  <a href="/clinic/cards">View All Cards</a>
-                </Button>
-                <Button asChild className="w-full">
-                  <a href="/clinic/cards/generate">Generate New Cards</a>
-                </Button>
+          <div className="apple-card group">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4">
+                <CreditCard className="w-6 h-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Card Management</h3>
+            <p className="text-gray-600 text-base mb-6">
+              Manage patient dental cards, view card details, and generate new cards.
+            </p>
+            <div className="space-y-3">
+              <a href="/clinic/cards" className="apple-button block text-center py-3">
+                View All Cards
+              </a>
+              <a href="/clinic/cards/generate" className="apple-button block text-center py-3 bg-blue-600 hover:bg-blue-700">
+                Generate New Cards
+              </a>
+            </div>
+          </div>
 
           <Card>
             <CardHeader>

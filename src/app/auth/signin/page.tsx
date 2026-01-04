@@ -46,58 +46,82 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white p-4">
-      <div className="max-w-sm w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">MOCARDS</h1>
-          <p className="text-gray-500">Admin Access</p>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+        {/* Apple-style branding */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 mb-6 shadow-lg">
+            <span className="text-white text-2xl font-medium">M</span>
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 mb-2">Sign in to MOCARDS</h1>
+          <p className="text-base text-gray-500 font-medium">Healthcare management simplified</p>
         </div>
 
-        <Card className="shadow-lg border-0">
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive" className="text-sm">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+        {/* Apple-style glass card */}
+        <div className="apple-card mb-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200">
+                <p className="text-sm font-medium text-red-700">{error}</p>
+              </div>
+            )}
 
+            <div className="space-y-4">
               <div>
-                <Input
+                <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  placeholder="Username"
-                  className="h-12"
+                  placeholder="Enter your username"
+                  className="apple-input"
                 />
               </div>
 
               <div>
-                <Input
+                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Password"
-                  className="h-12"
+                  placeholder="Enter your password"
+                  className="apple-input"
                 />
               </div>
+            </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 text-base"
-              >
-                {loading ? 'Signing in...' : 'Sign In'}
-              </Button>
-            </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="apple-button w-full py-4 text-base font-medium"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </span>
+              ) : 'Sign In'}
+            </button>
+          </form>
+        </div>
 
-          </CardContent>
-        </Card>
-
-        <div className="mt-4 text-center text-xs text-gray-400">
-          Default: admin / admin123
+        {/* Apple-style helper text */}
+        <div className="text-center">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 border border-gray-200">
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="w-2 h-2 rounded-full bg-green-400"></div>
+              <span className="font-medium">Demo accounts available</span>
+            </div>
+          </div>
+          <div className="mt-3 space-y-1 text-xs text-gray-500">
+            <p><span className="font-medium">Admin:</span> admin / admin123</p>
+            <p><span className="font-medium">Clinic:</span> clinic1 / clinic123</p>
+          </div>
         </div>
       </div>
     </div>
