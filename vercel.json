@@ -1,12 +1,11 @@
 {
   "framework": "nextjs",
-  "regions": ["iad1", "hnd1", "sin1"],
   "functions": {
     "app/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 10
     },
     "app/**/*.tsx": {
-      "maxDuration": 30
+      "maxDuration": 10
     }
   },
   "headers": [
