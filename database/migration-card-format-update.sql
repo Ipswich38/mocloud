@@ -68,25 +68,26 @@ BEGIN
         RAISE NOTICE 'Cards table does not exist yet - will be created with new format';
     END IF;
 
-    -- Generate clinic codes for new regions (QZN and RIZ)
-    DECLARE
-        region_record RECORD;
-        i INTEGER;
-        clinic_code VARCHAR(6);
-    BEGIN
-        -- Only generate codes for new regions
-        FOR region_record IN SELECT id, code FROM regions WHERE code IN ('QZN', 'RIZ') LOOP
-            FOR i IN 1..16 LOOP
-                clinic_code := region_record.code || LPAD(i::TEXT, 3, '0');
-                INSERT INTO clinic_codes (region_id, code, is_assigned)
-                VALUES (region_record.id, clinic_code, FALSE)
-                ON CONFLICT (code) DO NOTHING;
-            END LOOP;
-        END LOOP;
-        RAISE NOTICE 'Generated clinic codes for new regions QZN and RIZ (001-016 each)';
-    END;
-
 END $$migration_cards$$;
+
+-- Generate clinic codes for new regions (QZN and RIZ)
+DO $$
+DECLARE
+    region_record RECORD;
+    i INTEGER;
+    clinic_code VARCHAR(6);
+BEGIN
+    -- Only generate codes for new regions
+    FOR region_record IN SELECT id, code FROM regions WHERE code IN ('QZN', 'RIZ') LOOP
+        FOR i IN 1..16 LOOP
+            clinic_code := region_record.code || LPAD(i::TEXT, 3, '0');
+            INSERT INTO clinic_codes (region_id, code, is_assigned)
+            VALUES (region_record.id, clinic_code, FALSE)
+            ON CONFLICT (code) DO NOTHING;
+        END LOOP;
+    END LOOP;
+    RAISE NOTICE 'Generated clinic codes for new regions QZN and RIZ (001-016 each)';
+END $$;
 
 -- Create or replace function to generate new format card codes
 CREATE OR REPLACE FUNCTION generate_card_code(
