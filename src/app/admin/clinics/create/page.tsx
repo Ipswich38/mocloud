@@ -69,7 +69,7 @@ export default function CreateClinicPage() {
   ];
 
   const AREA_CODES = {
-    // Central Valley Codes (CVT001 to CVT016)
+    // Cavite Codes (CVT001 to CVT016)
     CVT: [
       'CVT001', 'CVT002', 'CVT003', 'CVT004', 'CVT005', 'CVT006', 'CVT007', 'CVT008',
       'CVT009', 'CVT010', 'CVT011', 'CVT012', 'CVT013', 'CVT014', 'CVT015', 'CVT016'
@@ -250,10 +250,10 @@ export default function CreateClinicPage() {
                       <SelectValue placeholder="Select clinic code" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* Central Valley Codes */}
+                      {/* Cavite Codes */}
                       {AREA_CODES.CVT.map(code => (
                         <SelectItem key={code} value={code}>
-                          {code} - Central Valley
+                          {code} - Cavite
                         </SelectItem>
                       ))}
                       {/* Laguna Codes */}
@@ -278,7 +278,7 @@ export default function CreateClinicPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-gray-500 mt-1">
-                    CVT001-016: Central Valley | LGN001-016: Laguna | BTG001-016: Batangas | MIM001-016: MIMAROPA
+                    CVT001-016: Cavite | LGN001-016: Laguna | BTG001-016: Batangas | MIM001-016: MIMAROPA
                   </p>
                 </div>
 

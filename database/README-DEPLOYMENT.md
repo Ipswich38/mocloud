@@ -135,11 +135,11 @@ WHERE tablename = 'appointments';
 ## Database Schema Overview
 
 ```
-regions (4 Philippine regions)
-├── clinic_codes (64 codes: 16 per region)
+regions (6 Philippine regions: CVT-Cavite, BTG-Batangas, LGN-Laguna, QZN-Quezon, RIZ-Rizal, MIM-MIMAROPA)
+├── clinic_codes (96 codes: 16 per region)
 ├── clinics (registered dental clinics)
 ├── user_profiles (admin, clinic, public roles)
-├── cards (dental benefit cards)
+├── cards (dental benefit cards with MOC-NNNNN-RRR-CCCCCC format)
 │   ├── card_perks (benefits per card)
 │   └── appointments (enhanced workflow)
 └── perk_redemptions (audit trail)
