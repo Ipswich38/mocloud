@@ -280,4 +280,131 @@ BEGIN
     END IF;
 END $$;
 
+-- Add region and clinic code fields to clinics table
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS region VARCHAR(10);
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS area_code VARCHAR(10);
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS custom_region VARCHAR(100);
+ALTER TABLE clinics ADD COLUMN IF NOT EXISTS custom_code VARCHAR(20);
+
+-- Create indexes for efficient lookups
+CREATE INDEX IF NOT EXISTS idx_clinics_region_code ON clinics(region, area_code);
+CREATE INDEX IF NOT EXISTS idx_clinics_area_code ON clinics(area_code);
+
+-- Update existing sample clinics with region and area codes
+UPDATE clinics
+SET region = '4A', area_code = 'CVT001'
+WHERE name = 'SmileCare Dental Cavite';
+
+UPDATE clinics
+SET region = '4A', area_code = 'BTG001'
+WHERE name = 'Bright Dental Batangas';
+
+UPDATE clinics
+SET region = '4A', area_code = 'LGN001'
+WHERE name = 'Pearl White Dental Laguna';
+
+-- Function to get available clinic codes by area
+CREATE OR REPLACE FUNCTION get_available_clinic_codes(
+    p_area_prefix VARCHAR(3)
+)
+RETURNS TABLE(
+    code VARCHAR(10),
+    is_available BOOLEAN
+) AS $$
+DECLARE
+    i INTEGER;
+    code_to_check VARCHAR(10);
+    code_exists BOOLEAN;
+BEGIN
+    FOR i IN 1..16 LOOP
+        code_to_check := p_area_prefix || LPAD(i::TEXT, 3, '0');
+
+        SELECT EXISTS(
+            SELECT 1 FROM clinics
+            WHERE area_code = code_to_check AND is_active = true
+        ) INTO code_exists;
+
+        RETURN QUERY SELECT code_to_check, NOT code_exists;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to validate clinic creation with region/code
+CREATE OR REPLACE FUNCTION validate_clinic_creation(
+    p_clinic_name VARCHAR(100),
+    p_region VARCHAR(10),
+    p_area_code VARCHAR(10),
+    p_custom_region VARCHAR(100) DEFAULT NULL,
+    p_custom_code VARCHAR(20) DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_errors TEXT[] := ARRAY[]::TEXT[];
+    v_final_region VARCHAR(100);
+    v_final_code VARCHAR(20);
+    v_code_exists BOOLEAN := FALSE;
+BEGIN
+    -- Validate required fields
+    IF LENGTH(TRIM(p_clinic_name)) = 0 THEN
+        v_errors := array_append(v_errors, 'Clinic name is required');
+    END IF;
+
+    IF LENGTH(TRIM(p_region)) = 0 THEN
+        v_errors := array_append(v_errors, 'Region is required');
+    END IF;
+
+    IF LENGTH(TRIM(p_area_code)) = 0 THEN
+        v_errors := array_append(v_errors, 'Clinic code is required');
+    END IF;
+
+    -- Handle custom region
+    IF p_region = 'CUSTOM' THEN
+        IF p_custom_region IS NULL OR LENGTH(TRIM(p_custom_region)) = 0 THEN
+            v_errors := array_append(v_errors, 'Custom region name is required');
+        END IF;
+        v_final_region := p_custom_region;
+    ELSE
+        v_final_region := p_region;
+    END IF;
+
+    -- Handle custom code
+    IF p_area_code = 'CUSTOM' THEN
+        IF p_custom_code IS NULL OR LENGTH(TRIM(p_custom_code)) = 0 THEN
+            v_errors := array_append(v_errors, 'Custom clinic code is required');
+        END IF;
+        v_final_code := p_custom_code;
+    ELSE
+        v_final_code := p_area_code;
+    END IF;
+
+    -- Check if clinic code already exists
+    SELECT EXISTS(
+        SELECT 1 FROM clinics
+        WHERE area_code = v_final_code AND is_active = true
+    ) INTO v_code_exists;
+
+    IF v_code_exists THEN
+        v_errors := array_append(v_errors, 'Clinic code ' || v_final_code || ' is already in use');
+    END IF;
+
+    -- Check clinic name uniqueness
+    SELECT EXISTS(
+        SELECT 1 FROM clinics
+        WHERE LOWER(name) = LOWER(p_clinic_name) AND is_active = true
+    ) INTO v_code_exists;
+
+    IF v_code_exists THEN
+        v_errors := array_append(v_errors, 'Clinic name already exists');
+    END IF;
+
+    RETURN jsonb_build_object(
+        'is_valid', array_length(v_errors, 1) IS NULL,
+        'errors', COALESCE(array_to_json(v_errors), '[]'::json),
+        'final_region', v_final_region,
+        'final_code', v_final_code
+    );
+END;
+$$ LANGUAGE plpgsql;
+
 SELECT '✅ CLINIC AUTH: Enhanced clinic authentication system ready' as status;
+SELECT '✅ CLINIC REGIONS: Philippine regions and clinic codes system added' as region_status;

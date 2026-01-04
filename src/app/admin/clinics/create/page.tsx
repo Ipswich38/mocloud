@@ -36,17 +36,67 @@ export default function CreateClinicPage() {
   // Form data
   const [clinicName, setClinicName] = useState('');
   const [region, setRegion] = useState('');
+  const [clinicCode, setClinicCode] = useState('');
+  const [customRegion, setCustomRegion] = useState('');
+  const [customCode, setCustomCode] = useState('');
   const [address, setAddress] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [description, setDescription] = useState('');
 
-  const regions = [
-    { code: 'CVT', name: 'Cavite', availableCodes: 12 },
-    { code: 'BTG', name: 'Batangas', availableCodes: 8 },
-    { code: 'LGN', name: 'Laguna', availableCodes: 15 },
-    { code: 'MIM', name: 'MIMAROPA', availableCodes: 4 }
+  const PHILIPPINES_REGIONS = [
+    { code: '01', name: 'Ilocos Region (Region 1)' },
+    { code: '02', name: 'Cagayan Valley (Region 2)' },
+    { code: '03', name: 'Central Luzon (Region 3)' },
+    { code: '4A', name: 'Calabarzon (Region 4A)' },
+    { code: '4B', name: 'Mimaropa (Region 4B)' },
+    { code: '05', name: 'Bicol Region (Region 5)' },
+    { code: '06', name: 'Western Visayas (Region 6)' },
+    { code: '07', name: 'Central Visayas (Region 7)' },
+    { code: '08', name: 'Eastern Visayas (Region 8)' },
+    { code: '09', name: 'Zamboanga Peninsula (Region 9)' },
+    { code: '10', name: 'Northern Mindanao (Region 10)' },
+    { code: '11', name: 'Davao Region (Region 11)' },
+    { code: '12', name: 'Soccsksargen (Region 12)' },
+    { code: '13', name: 'Caraga Region (Region 13)' },
+    { code: '14', name: 'Bangsamoro (Region 14)' },
+    { code: '15', name: 'Mimaropa Expansion (Region 15)' },
+    { code: '16', name: 'Northern Luzon (Region 16)' },
+    { code: 'NCR', name: 'National Capital Region (NCR)' },
+    { code: 'CAR', name: 'Cordillera Administrative Region (CAR)' },
+    { code: 'CUSTOM', name: 'Custom Region' }
+  ];
+
+  const AREA_CODES = {
+    // Central Valley Codes (CVT001 to CVT016)
+    CVT: [
+      'CVT001', 'CVT002', 'CVT003', 'CVT004', 'CVT005', 'CVT006', 'CVT007', 'CVT008',
+      'CVT009', 'CVT010', 'CVT011', 'CVT012', 'CVT013', 'CVT014', 'CVT015', 'CVT016'
+    ],
+    // Laguna Codes (LGN001 to LGN016)
+    LGN: [
+      'LGN001', 'LGN002', 'LGN003', 'LGN004', 'LGN005', 'LGN006', 'LGN007', 'LGN008',
+      'LGN009', 'LGN010', 'LGN011', 'LGN012', 'LGN013', 'LGN014', 'LGN015', 'LGN016'
+    ],
+    // Batangas Codes (BTG001 to BTG016)
+    BTG: [
+      'BTG001', 'BTG002', 'BTG003', 'BTG004', 'BTG005', 'BTG006', 'BTG007', 'BTG008',
+      'BTG009', 'BTG010', 'BTG011', 'BTG012', 'BTG013', 'BTG014', 'BTG015', 'BTG016'
+    ],
+    // MIMAROPA Region 4B Codes (MIM001 to MIM016)
+    MIM: [
+      'MIM001', 'MIM002', 'MIM003', 'MIM004', 'MIM005', 'MIM006', 'MIM007', 'MIM008',
+      'MIM009', 'MIM010', 'MIM011', 'MIM012', 'MIM013', 'MIM014', 'MIM015', 'MIM016'
+    ]
+  };
+
+  const ALL_AREA_CODES = [
+    ...AREA_CODES.CVT,
+    ...AREA_CODES.LGN,
+    ...AREA_CODES.BTG,
+    ...AREA_CODES.MIM,
+    'CUSTOM'
   ];
 
   const generateClinicCode = (regionCode: string): string => {
@@ -62,15 +112,26 @@ export default function CreateClinicPage() {
   };
 
   const handleCreate = async () => {
-    if (!clinicName || !region || !address || !contactEmail || !contactPhone || !contactPerson) {
+    if (!clinicName || !region || !clinicCode || !address || !contactEmail || !contactPhone || !contactPerson) {
+      return;
+    }
+
+    // Validate custom fields
+    if (region === 'CUSTOM' && !customRegion) {
+      return;
+    }
+    if (clinicCode === 'CUSTOM' && !customCode) {
       return;
     }
 
     setCreating(true);
 
     try {
-      const clinicCode = generateClinicCode(region);
       const { username, password } = generateCredentials(clinicName);
+
+      // Use selected clinic code or custom code
+      const finalClinicCode = clinicCode === 'CUSTOM' ? customCode : clinicCode;
+      const finalRegion = region === 'CUSTOM' ? customRegion : region;
 
       // In a real implementation, this would make API calls to:
       // 1. Create clinic in database
@@ -82,8 +143,8 @@ export default function CreateClinicPage() {
       const newClinic: CreatedClinic = {
         id: `clinic-${Date.now()}`,
         name: clinicName,
-        clinicCode: clinicCode,
-        region: region,
+        clinicCode: finalClinicCode,
+        region: finalRegion,
         adminUsername: username,
         adminPassword: password,
         address: address,
@@ -106,6 +167,9 @@ export default function CreateClinicPage() {
   const resetForm = () => {
     setClinicName('');
     setRegion('');
+    setClinicCode('');
+    setCustomRegion('');
+    setCustomCode('');
     setAddress('');
     setContactEmail('');
     setContactPhone('');
@@ -154,17 +218,86 @@ export default function CreateClinicPage() {
                   <Label htmlFor="region">Region *</Label>
                   <Select value={region} onValueChange={setRegion}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select region" />
+                      <SelectValue placeholder="Select Philippine region" />
                     </SelectTrigger>
                     <SelectContent>
-                      {regions.map(r => (
+                      {PHILIPPINES_REGIONS.map(r => (
                         <SelectItem key={r.code} value={r.code}>
-                          {r.name} ({r.code}) - {r.availableCodes} codes available
+                          {r.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Custom Region Input */}
+                {region === 'CUSTOM' && (
+                  <div className="md:col-span-2">
+                    <Label htmlFor="customRegion">Custom Region Name *</Label>
+                    <Input
+                      id="customRegion"
+                      value={customRegion}
+                      onChange={(e) => setCustomRegion(e.target.value)}
+                      placeholder="Enter custom region name"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="clinicCode">Clinic Code *</Label>
+                  <Select value={clinicCode} onValueChange={setClinicCode}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select clinic code" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* Central Valley Codes */}
+                      {AREA_CODES.CVT.map(code => (
+                        <SelectItem key={code} value={code}>
+                          {code} - Central Valley
+                        </SelectItem>
+                      ))}
+                      {/* Laguna Codes */}
+                      {AREA_CODES.LGN.map(code => (
+                        <SelectItem key={code} value={code}>
+                          {code} - Laguna
+                        </SelectItem>
+                      ))}
+                      {/* Batangas Codes */}
+                      {AREA_CODES.BTG.map(code => (
+                        <SelectItem key={code} value={code}>
+                          {code} - Batangas
+                        </SelectItem>
+                      ))}
+                      {/* MIMAROPA Codes */}
+                      {AREA_CODES.MIM.map(code => (
+                        <SelectItem key={code} value={code}>
+                          {code} - MIMAROPA
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="CUSTOM">🔧 Custom Code</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    CVT001-016: Central Valley | LGN001-016: Laguna | BTG001-016: Batangas | MIM001-016: MIMAROPA
+                  </p>
+                </div>
+
+                {/* Custom Code Input */}
+                {clinicCode === 'CUSTOM' && (
+                  <div className="md:col-span-2">
+                    <Label htmlFor="customCode">Custom Clinic Code *</Label>
+                    <Input
+                      id="customCode"
+                      value={customCode}
+                      onChange={(e) => setCustomCode(e.target.value)}
+                      placeholder="Enter custom clinic code (e.g., ABC001)"
+                      maxLength={6}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Format: 3 letters + 3 numbers (e.g., ABC001, XYZ999)
+                    </p>
+                  </div>
+                )}
 
                 <div className="md:col-span-2">
                   <Label htmlFor="address">Clinic Address *</Label>
@@ -221,7 +354,18 @@ export default function CreateClinicPage() {
 
               <Button
                 onClick={handleCreate}
-                disabled={creating || !clinicName || !region || !address || !contactEmail || !contactPhone || !contactPerson}
+                disabled={
+                  creating ||
+                  !clinicName ||
+                  !region ||
+                  !clinicCode ||
+                  !address ||
+                  !contactEmail ||
+                  !contactPhone ||
+                  !contactPerson ||
+                  (region === 'CUSTOM' && !customRegion) ||
+                  (clinicCode === 'CUSTOM' && !customCode)
+                }
                 className="w-full"
               >
                 {creating ? 'Creating Clinic Account...' : 'Create Multi-Tenant Clinic'}
