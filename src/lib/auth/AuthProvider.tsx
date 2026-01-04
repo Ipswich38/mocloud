@@ -22,16 +22,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check for existing session on mount
   useEffect(() => {
     const checkSession = () => {
-      const sessionData = localStorage.getItem('admin_session');
-      if (sessionData) {
+      // Check for admin session first
+      const adminSession = localStorage.getItem('admin_session');
+      if (adminSession) {
         try {
-          const session = JSON.parse(sessionData);
+          const session = JSON.parse(adminSession);
           setUser(session.user);
           setProfile(session.profile);
+          setLoading(false);
+          return;
         } catch (error) {
           localStorage.removeItem('admin_session');
         }
       }
+
+      // Check for clinic session
+      const clinicSession = localStorage.getItem('clinic_session');
+      if (clinicSession) {
+        try {
+          const session = JSON.parse(clinicSession);
+          setUser(session.user);
+          setProfile(session.profile);
+          setLoading(false);
+          return;
+        } catch (error) {
+          localStorage.removeItem('clinic_session');
+        }
+      }
+
       setLoading(false);
     };
 
@@ -51,6 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(result.adminSession.profile);
       // Persist session to localStorage
       localStorage.setItem('admin_session', JSON.stringify(result.adminSession));
+    } else if (result.isClinic && result.clinicSession) {
+      setUser(result.clinicSession.user);
+      setProfile(result.clinicSession.profile);
+      // Persist clinic session
+      localStorage.setItem('clinic_session', JSON.stringify(result.clinicSession));
     }
 
     return { error: null };
@@ -61,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setProfile(null);
     localStorage.removeItem('admin_session');
+    localStorage.removeItem('clinic_session');
   };
 
   const value = {
@@ -109,6 +133,23 @@ export function useRequireAdmin() {
     }
     // If we have a user but they're not admin, redirect
     if (!loading && user && profile && profile.role !== 'admin') {
+      window.location.href = '/auth/signin';
+    }
+  }, [user, profile, loading]);
+
+  return { profile, loading };
+}
+
+export function useRequireClinic() {
+  const { user, profile, loading } = useAuth();
+
+  useEffect(() => {
+    // Only redirect if we're sure we've finished loading and no clinic session
+    if (!loading && !user && !profile) {
+      window.location.href = '/auth/signin';
+    }
+    // If we have a user but they're not clinic, redirect
+    if (!loading && user && profile && profile.role !== 'clinic') {
       window.location.href = '/auth/signin';
     }
   }, [user, profile, loading]);

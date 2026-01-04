@@ -68,29 +68,39 @@ export default function CreateClinicPage() {
 
     setCreating(true);
 
-    // Simulate clinic creation
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const clinicCode = generateClinicCode(region);
+      const { username, password } = generateCredentials(clinicName);
 
-    const clinicCode = generateClinicCode(region);
-    const { username, password } = generateCredentials(clinicName);
+      // In a real implementation, this would make API calls to:
+      // 1. Create clinic in database
+      // 2. Create clinic credentials
+      // For now, we simulate the creation
 
-    const newClinic: CreatedClinic = {
-      id: `clinic-${Date.now()}`,
-      name: clinicName,
-      clinicCode: clinicCode,
-      region: region,
-      adminUsername: username,
-      adminPassword: password,
-      address: address,
-      contactEmail: contactEmail,
-      contactPhone: contactPhone,
-      contactPerson: contactPerson,
-      createdAt: new Date().toISOString()
-    };
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-    setCreatedClinic(newClinic);
-    setCreated(true);
-    setCreating(false);
+      const newClinic: CreatedClinic = {
+        id: `clinic-${Date.now()}`,
+        name: clinicName,
+        clinicCode: clinicCode,
+        region: region,
+        adminUsername: username,
+        adminPassword: password,
+        address: address,
+        contactEmail: contactEmail,
+        contactPhone: contactPhone,
+        contactPerson: contactPerson,
+        createdAt: new Date().toISOString()
+      };
+
+      setCreatedClinic(newClinic);
+      setCreated(true);
+    } catch (error) {
+      console.error('Failed to create clinic:', error);
+      // Handle error - in real app, show error message
+    } finally {
+      setCreating(false);
+    }
   };
 
   const resetForm = () => {

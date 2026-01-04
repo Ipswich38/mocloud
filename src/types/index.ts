@@ -82,6 +82,8 @@ export interface UserProfile {
   email: string;
   role: 'admin' | 'clinic' | 'public';
   clinic_id?: string;
+  clinic_name?: string; // For clinic users
+  must_change_password?: boolean; // For clinic password management
   created_at: string;
   updated_at: string;
 }

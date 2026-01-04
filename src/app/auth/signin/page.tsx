@@ -34,7 +34,8 @@ export default function SignInPage() {
         if (username === 'admin') {
           window.location.href = '/admin';
         } else {
-          router.push('/dashboard');
+          // For clinic login, go to clinic portal
+          window.location.href = '/clinic';
         }
       }
     } catch (err) {
