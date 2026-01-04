@@ -48,8 +48,8 @@ export function CardGenerationForm({ clinics = [], onGenerationComplete }: CardG
   const validateForm = (): string[] => {
     const validationErrors: string[] = [];
 
-    if (effectiveQuantity < 1 || effectiveQuantity > 10000) {
-      validationErrors.push('Quantity must be between 1 and 10,000');
+    if (effectiveQuantity < 1 || effectiveQuantity > 100000) {
+      validationErrors.push('Quantity must be between 1 and 100,000');
     }
 
     if (effectivePrefix.length < 2 || effectivePrefix.length > 5) {
@@ -209,7 +209,7 @@ export function CardGenerationForm({ clinics = [], onGenerationComplete }: CardG
               <Zap className="h-5 w-5 text-blue-600" />
               MOC Card Generation
             </CardTitle>
-            <p className="text-gray-600">Generate dental benefit cards with format MOC-NNNNN-RRR-CCCCCC (up to 10,000 per clinic)</p>
+            <p className="text-gray-600">Generate dental benefit cards with format MOC-XXXXXX-RRR-CCCCCC (up to 100,000 per clinic)</p>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Error Display */}
@@ -247,12 +247,12 @@ export function CardGenerationForm({ clinics = [], onGenerationComplete }: CardG
 
               {/* Custom Quantity Input */}
               <div>
-                <Label htmlFor="customQuantity">Custom Quantity (1-10,000)</Label>
+                <Label htmlFor="customQuantity">Custom Quantity (1-100,000)</Label>
                 <Input
                   id="customQuantity"
                   type="number"
                   min="1"
-                  max="10000"
+                  max="100000"
                   value={customQuantity}
                   onChange={(e) => handleCustomQuantityChange(e.target.value)}
                   placeholder="Enter custom quantity"
@@ -305,7 +305,7 @@ export function CardGenerationForm({ clinics = [], onGenerationComplete }: CardG
                 </Badge>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                New Format: MOC-{(effectiveQuantity || 1).toString().padStart(5, '0')}-{clinics.find(c => c.id === clinicId)?.region || 'RRR'}-{clinics.find(c => c.id === clinicId)?.region || 'CCC'}001
+                New Format: MOC-{(effectiveQuantity || 1).toString().padStart(6, '0')}-{clinics.find(c => c.id === clinicId)?.region || 'RRR'}-{clinics.find(c => c.id === clinicId)?.region || 'CCC'}001
               </p>
             </div>
 

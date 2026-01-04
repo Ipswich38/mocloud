@@ -84,7 +84,7 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_clinic ON user_profiles(clinic_id);
 -- First create the table with basic structure if it doesn't exist
 CREATE TABLE IF NOT EXISTS cards (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    card_code VARCHAR(25) NOT NULL UNIQUE,
+    card_code VARCHAR(26) NOT NULL UNIQUE,
     patient_name VARCHAR(100) NOT NULL,
     patient_birthdate DATE NOT NULL,
     patient_address TEXT NOT NULL,
@@ -117,9 +117,9 @@ BEGIN
         ALTER TABLE cards ADD COLUMN clinic_code VARCHAR(6);
     END IF;
 
-    -- Update card_code column size if needed
+    -- Update card_code column size if needed (MOC-XXXXXX-RRR-CCCCCC = 26 chars)
     BEGIN
-        ALTER TABLE cards ALTER COLUMN card_code TYPE VARCHAR(25);
+        ALTER TABLE cards ALTER COLUMN card_code TYPE VARCHAR(26);
     EXCEPTION
         WHEN OTHERS THEN
             NULL; -- Column already has sufficient size
@@ -449,11 +449,11 @@ CREATE OR REPLACE FUNCTION generate_card_code(
     p_control_number INTEGER,
     p_region_code VARCHAR(3),
     p_clinic_code VARCHAR(6)
-) RETURNS VARCHAR(25) AS $$
+) RETURNS VARCHAR(26) AS $$
 BEGIN
-    -- Format: MOC-NNNNN-RRR-CCCCCC
-    -- Example: MOC-00001-CVT-CVT001
-    RETURN 'MOC-' || LPAD(p_control_number::TEXT, 5, '0') || '-' || p_region_code || '-' || p_clinic_code;
+    -- Format: MOC-XXXXXX-RRR-CCCCCC
+    -- Example: MOC-000001-CVT-CVT001
+    RETURN 'MOC-' || LPAD(p_control_number::TEXT, 6, '0') || '-' || p_region_code || '-' || p_clinic_code;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -462,14 +462,14 @@ CREATE OR REPLACE FUNCTION get_next_control_number(p_clinic_id UUID) RETURNS INT
 DECLARE
     next_number INTEGER;
 BEGIN
-    -- Get the next available control number for this clinic (1-10000)
+    -- Get the next available control number for this clinic (1-100000)
     SELECT COALESCE(MAX(control_number), 0) + 1 INTO next_number
     FROM cards
     WHERE clinic_id = p_clinic_id;
 
-    -- Ensure we don't exceed 10000
-    IF next_number > 10000 THEN
-        RAISE EXCEPTION 'Control number limit exceeded for clinic. Maximum 10000 cards per clinic.';
+    -- Ensure we don't exceed 100000
+    IF next_number > 100000 THEN
+        RAISE EXCEPTION 'Control number limit exceeded for clinic. Maximum 100000 cards per clinic.';
     END IF;
 
     RETURN next_number;

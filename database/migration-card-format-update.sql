@@ -5,10 +5,10 @@
 -- =====================================================
 
 -- Migration for Card Generation Format Update
--- New format: MOC-00001-CVT-CVT001 to MOC-10000-MIM-MIM016
+-- New format: MOC-000001-CVT-CVT001 to MOC-100000-MIM-MIM016
 -- Where:
 --   MOC = Prefix
---   NNNNN = Control number (00001-10000)
+--   XXXXXX = Control number (000001-100000)
 --   RRR = Region code (CVT, BTG, LGN, QZN, RIZ, MIM)
 --   CCCCCC = Clinic code (CVT001, BTG002, etc.)
 
@@ -41,9 +41,9 @@ BEGIN
             ALTER TABLE cards ADD COLUMN clinic_code VARCHAR(6);
         END IF;
 
-        -- Update card_code column size if needed
+        -- Update card_code column size if needed (MOC-XXXXXX-RRR-CCCCCC = 26 chars)
         BEGIN
-            ALTER TABLE cards ALTER COLUMN card_code TYPE VARCHAR(25);
+            ALTER TABLE cards ALTER COLUMN card_code TYPE VARCHAR(26);
         EXCEPTION
             WHEN OTHERS THEN
                 RAISE NOTICE 'Card code column already has sufficient size';
@@ -94,11 +94,11 @@ CREATE OR REPLACE FUNCTION generate_card_code(
     p_control_number INTEGER,
     p_region_code VARCHAR(3),
     p_clinic_code VARCHAR(6)
-) RETURNS VARCHAR(25) AS $$
+) RETURNS VARCHAR(26) AS $$
 BEGIN
-    -- Format: MOC-NNNNN-RRR-CCCCCC
-    -- Example: MOC-00001-CVT-CVT001
-    RETURN 'MOC-' || LPAD(p_control_number::TEXT, 5, '0') || '-' || p_region_code || '-' || p_clinic_code;
+    -- Format: MOC-XXXXXX-RRR-CCCCCC
+    -- Example: MOC-000001-CVT-CVT001
+    RETURN 'MOC-' || LPAD(p_control_number::TEXT, 6, '0') || '-' || p_region_code || '-' || p_clinic_code;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -107,14 +107,14 @@ CREATE OR REPLACE FUNCTION get_next_control_number(p_clinic_id UUID) RETURNS INT
 DECLARE
     next_number INTEGER;
 BEGIN
-    -- Get the next available control number for this clinic (1-10000)
+    -- Get the next available control number for this clinic (1-100000)
     SELECT COALESCE(MAX(control_number), 0) + 1 INTO next_number
     FROM cards
     WHERE clinic_id = p_clinic_id;
 
-    -- Ensure we don't exceed 10000
-    IF next_number > 10000 THEN
-        RAISE EXCEPTION 'Control number limit exceeded for clinic. Maximum 10000 cards per clinic.';
+    -- Ensure we don't exceed 100000
+    IF next_number > 100000 THEN
+        RAISE EXCEPTION 'Control number limit exceeded for clinic. Maximum 100000 cards per clinic.';
     END IF;
 
     RETURN next_number;
@@ -128,7 +128,7 @@ CREATE OR REPLACE FUNCTION generate_cards_new_format(
     p_generated_by UUID
 ) RETURNS TABLE(
     card_id UUID,
-    card_code VARCHAR(25),
+    card_code VARCHAR(26),
     control_number INTEGER,
     region_code VARCHAR(3),
     clinic_code VARCHAR(6)
@@ -162,8 +162,8 @@ BEGIN
     SELECT get_next_control_number(p_clinic_id) INTO current_control_number;
 
     -- Validate we can generate the requested number of cards
-    IF current_control_number + p_number_of_cards - 1 > 10000 THEN
-        RAISE EXCEPTION 'Cannot generate % cards. Would exceed limit of 10000 cards per clinic. Next available: %',
+    IF current_control_number + p_number_of_cards - 1 > 100000 THEN
+        RAISE EXCEPTION 'Cannot generate % cards. Would exceed limit of 100000 cards per clinic. Next available: %',
             p_number_of_cards, current_control_number;
     END IF;
 
@@ -189,7 +189,7 @@ BEGIN
         RETURN NEXT;
     END LOOP;
 
-    RAISE NOTICE 'Generated % card codes in new format MOC-NNNNN-RRR-CCCCCC for clinic %',
+    RAISE NOTICE 'Generated % card codes in new format MOC-XXXXXX-RRR-CCCCCC for clinic %',
         p_number_of_cards, clinic_info.name;
 END;
 $$ LANGUAGE plpgsql;
@@ -218,9 +218,10 @@ ORDER BY r.code;
 -- Test card code generation function
 SELECT 'Sample card codes in new format:' as info;
 SELECT generate_card_code(1, 'CVT', 'CVT001') as sample_card_1;
-SELECT generate_card_code(150, 'BTG', 'BTG005') as sample_card_2;
-SELECT generate_card_code(10000, 'MIM', 'MIM016') as sample_card_3;
+SELECT generate_card_code(1500, 'BTG', 'BTG005') as sample_card_2;
+SELECT generate_card_code(100000, 'MIM', 'MIM016') as sample_card_3;
 
 SELECT '✅ Card format migration completed!' as status,
-       'New format: MOC-NNNNN-RRR-CCCCCC' as format,
+       'New format: MOC-XXXXXX-RRR-CCCCCC' as format,
+       'Control numbers: 000001-100000 per clinic' as range,
        'Ready for card generation with new system' as next_step;

@@ -69,7 +69,7 @@ export interface GenerationProgress {
 
 const cardGenerationRequestSchema = z.object({
   clinic_id: z.string().min(1, 'Clinic ID is required'),
-  count: z.number().min(1, 'Count must be at least 1').max(10000, 'Count cannot exceed 10,000'),
+  count: z.number().min(1, 'Count must be at least 1').max(100000, 'Count cannot exceed 100,000'),
   category_id: z.string().optional(),
   batch_id: z.string().optional(),
   prefix: z.string().min(2, 'Prefix must be at least 2 characters').max(5, 'Prefix cannot exceed 5 characters').regex(/^[A-Z]+$/, 'Prefix must contain only uppercase letters').optional(),
@@ -416,11 +416,12 @@ export class CardGenerationService {
   }
 
   getQuickQuantities(): number[] {
-    return [1, 10, 100, 1000];
+    return [1, 10, 100, 1000, 5000, 10000];
   }
 
   getControlNumberPreview(prefix: string = 'MOC'): string {
-    return `${prefix}-${Date.now()}-0001-ABC123`;
+    // New format: MOC-XXXXXX-RRR-CCCCCC
+    return `${prefix}-000001-CVT-CVT001`;
   }
 
   private generateRandomName(): string {

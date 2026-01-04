@@ -108,7 +108,7 @@ export default function GenerateCardsPage() {
               <h1 className="text-3xl font-bold text-gray-900">MOC Card Generation</h1>
             </div>
             <p className="mt-2 text-gray-600">
-              Generate dental benefit cards with format MOC-NNNNN-RRR-CCCCCC (up to 10,000 per clinic)
+              Generate dental benefit cards with format MOC-XXXXXX-RRR-CCCCCC (up to 100,000 per clinic)
             </p>
           </div>
           <div className="flex gap-2">
@@ -155,11 +155,11 @@ export default function GenerateCardsPage() {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <span className="text-yellow-600 font-bold text-sm">10K</span>
+                  <span className="text-yellow-600 font-bold text-sm">100K</span>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">10,000</div>
-                  <div className="text-sm text-gray-600">Max Batch Size</div>
+                  <div className="text-2xl font-bold">100,000</div>
+                  <div className="text-sm text-gray-600">Max Per Clinic</div>
                 </div>
               </div>
             </CardContent>
