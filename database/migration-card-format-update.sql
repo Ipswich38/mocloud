@@ -12,7 +12,7 @@
 --   RRR = Region code (CVT, BTG, LGN, QZN, RIZ, MIM)
 --   CCCCCC = Clinic code (CVT001, BTG002, etc.)
 
-DO $$migration_cards$$
+DO $$
 BEGIN
     -- First add new regions for Region 4A/4B split
     INSERT INTO regions (code, name) VALUES
@@ -68,7 +68,7 @@ BEGIN
         RAISE NOTICE 'Cards table does not exist yet - will be created with new format';
     END IF;
 
-END $$migration_cards$$;
+END $$;
 
 -- Generate clinic codes for new regions (QZN and RIZ)
 DO $$
